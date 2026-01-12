@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Proposal Generator</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -871,33 +870,50 @@
           <p><strong>Wenlaunch Studios</strong><br>${settings.business_email || ''}${settings.business_phone ? '<br>' + settings.business_phone : ''}</p>
         `;
 
-        const container = document.createElement('div');
-        container.innerHTML = html;
-        container.style.padding = '40px';
-        container.style.fontFamily = '-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif';
-        container.style.lineHeight = '1.6';
-        container.style.color = '#222';
-        container.style.background = '#fff';
-        container.style.position = 'absolute';
-        container.style.left = '-9999px';
-        container.style.top = '0';
-        container.style.width = '8.5in';
+        // Open in new window for printing
+        const printWindow = window.open('', '_blank');
+        printWindow.document.write(`
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <title>Proposal - ${clientName}</title>
+            <style>
+              body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+                line-height: 1.6;
+                color: #222;
+                padding: 40px;
+                max-width: 8.5in;
+                margin: 0 auto;
+              }
+              @media print {
+                body { padding: 0; }
+              }
+              table { border-collapse: collapse; width: 100%; margin: 20px 0; }
+              th, td { border: 1px solid #ccc; padding: 12px; text-align: left; }
+              th { background: #000; color: #fff; }
+              h1 { border-bottom: 2px solid #000; padding-bottom: 10px; }
+              h2 { margin-top: 30px; }
+              hr { border: none; border-top: 1px solid #ddd; margin: 30px 0; }
+              ul { padding-left: 20px; }
+              li { margin: 8px 0; }
+              .print-btn {
+                background: #000; color: #fff; padding: 12px 24px; border: none;
+                border-radius: 6px; cursor: pointer; font-size: 16px; margin-bottom: 20px;
+              }
+              .print-btn:hover { background: #333; }
+              @media print { .print-btn { display: none; } }
+            </style>
+          </head>
+          <body>
+            <button class="print-btn" onclick="window.print()">Print / Save as PDF</button>
+            ${html}
+          </body>
+          </html>
+        `);
+        printWindow.document.close();
 
-        document.body.appendChild(container);
-
-        const opt = {
-          margin: 0.75,
-          filename: `proposal-${clientName.replace(/[^a-zA-Z0-9]/g, '-').toLowerCase()}.pdf`,
-          image: { type: 'jpeg', quality: 0.98 },
-          html2canvas: { scale: 2, useCORS: true, logging: false },
-          jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
-        };
-
-        await html2pdf().set(opt).from(container).save();
-
-        document.body.removeChild(container);
-
-        showStatus('PDF generated and downloaded!', 'success');
+        showStatus('Proposal opened in new tab - click Print or use Cmd/Ctrl+P to save as PDF', 'success');
       } catch (e) {
         showStatus('Error: ' + e.message, 'error');
       } finally {
