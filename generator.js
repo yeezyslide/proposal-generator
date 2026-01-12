@@ -39,7 +39,7 @@ export function generateMarkdown(data, settings = {}) {
 
   let md = `# Web Design Proposal
 
-**For:** ${data.client_name}
+**Client:** ${data.client_name}
 **Date:** ${date}
 **From:** ${businessName}
 
@@ -164,7 +164,7 @@ export async function convertToPdf(markdownPath, pdfPath, settings = {}) {
   }
 
   const logoHtml = logoBase64
-    ? `<img src="data:image/jpeg;base64,${logoBase64}" style="max-width: 180px; max-height: 80px; margin-bottom: 20px;" />`
+    ? `<img src="data:image/jpeg;base64,${logoBase64}" style="max-width: 160px; max-height: 70px; object-fit: contain;" />`
     : '';
 
   const pdf = await mdToPdf(
@@ -254,62 +254,88 @@ export async function convertToPdf(markdownPath, pdfPath, settings = {}) {
           <style>
             body {
               font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
-              line-height: 1.6;
-              color: #222;
+              line-height: 1.5;
+              color: #2c3e50;
               max-width: 100%;
               padding: 0;
               margin: 0;
+              font-size: 13px;
             }
             .logo-header {
-              margin-bottom: 30px;
+              margin-bottom: 25px;
+              border-bottom: 1px solid #e0e0e0;
+              padding-bottom: 15px;
             }
             h1 {
-              color: #000;
-              border-bottom: 2px solid #000;
-              padding-bottom: 10px;
+              color: #1a1a1a;
+              border-bottom: none;
+              padding-bottom: 8px;
               margin-top: 0;
+              font-size: 24px;
+              font-weight: 600;
+              letter-spacing: -0.5px;
             }
             h2 {
-              color: #000;
-              margin-top: 30px;
+              color: #1a1a1a;
+              margin-top: 28px;
+              margin-bottom: 12px;
+              font-size: 17px;
+              font-weight: 600;
+              letter-spacing: -0.3px;
             }
             h3 {
-              color: #333;
+              color: #34495e;
+              font-size: 14px;
+              font-weight: 600;
+              margin-top: 16px;
+              margin-bottom: 8px;
+            }
+            p {
+              margin: 10px 0;
+              font-size: 13px;
             }
             table {
               border-collapse: collapse;
               width: 100%;
-              margin: 20px 0;
+              margin: 16px 0;
+              font-size: 12px;
             }
             th, td {
-              border: 1px solid #ccc;
-              padding: 12px;
+              border: 1px solid #e0e0e0;
+              padding: 10px 12px;
               text-align: left;
             }
             th {
-              background-color: #000;
+              background-color: #2c3e50;
               color: white;
+              font-weight: 600;
+              font-size: 12px;
             }
             tr:nth-child(even) {
-              background-color: #f5f5f5;
+              background-color: #f8f9fa;
             }
             hr {
               border: none;
-              border-top: 1px solid #ddd;
-              margin: 30px 0;
+              border-top: 1px solid #e0e0e0;
+              margin: 24px 0;
             }
             ul {
               padding-left: 20px;
+              margin: 10px 0;
             }
             li {
-              margin: 8px 0;
+              margin: 6px 0;
+              font-size: 13px;
             }
             em {
-              font-size: 0.9em;
-              color: #555;
+              font-size: 11px;
+              color: #7f8c8d;
+              line-height: 1.4;
             }
             strong {
-              color: #000;
+              color: #1a1a1a;
+              font-weight: 600;
+              font-size: 13px;
             }
           </style>
         </head>

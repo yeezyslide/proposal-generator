@@ -22,7 +22,7 @@ export default async function handler(req, res) {
 
     let md = `# Web Design Proposal
 
-**For:** ${data.client_name}
+**Client:** ${data.client_name}
 **Date:** ${date}
 **From:** Wenlaunch Studios
 
