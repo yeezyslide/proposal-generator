@@ -790,84 +790,93 @@
 
         const date = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 
-        // Build HTML directly
+        // Build HTML directly with logo
+        let logoHtml = '';
+        // Embed logo as base64 - you'll need to convert your logo.jpg to base64
+        // For now, it will show without logo, but you can add it by converting logo.jpg to base64
+        
         let html = `
-          <h1 style="color:#000;border-bottom:2px solid #000;padding-bottom:10px;margin-top:0;">Web Design Proposal</h1>
-          <p><strong>For:</strong> ${clientName}<br>
-          <strong>Date:</strong> ${date}<br>
-          <strong>From:</strong> Wenlaunch Studios</p>
-          <hr style="border:none;border-top:1px solid #ddd;margin:30px 0;">
+          <div style="margin-bottom:25px;border-bottom:1px solid #e0e0e0;padding-bottom:15px;">
+            ${logoHtml}
+          </div>
+          <h1 style="color:#1a1a1a;border-bottom:none;padding-bottom:8px;margin-top:0;font-size:24px;font-weight:600;letter-spacing:-0.5px;">Web Design Proposal</h1>
+          <p style="font-size:13px;"><strong style="color:#1a1a1a;font-weight:600;">Client:</strong> ${clientName}<br>
+          <strong style="color:#1a1a1a;font-weight:600;">Date:</strong> ${date}<br>
+          <strong style="color:#1a1a1a;font-weight:600;">From:</strong> Wenlaunch Studios</p>
+          <hr style="border:none;border-top:1px solid #e0e0e0;margin:24px 0;">
 
-          <h2 style="color:#000;margin-top:30px;">Project Summary</h2>
-          <p>${projectSummary.replace(/\n/g, '<br>')}</p>
-          <hr style="border:none;border-top:1px solid #ddd;margin:30px 0;">
+          <h2 style="color:#1a1a1a;margin-top:28px;margin-bottom:12px;font-size:17px;font-weight:600;letter-spacing:-0.3px;">Project Summary</h2>
+          <p style="font-size:13px;line-height:1.5;color:#2c3e50;">${projectSummary.replace(/\n/g, '<br>')}</p>
+          <hr style="border:none;border-top:1px solid #e0e0e0;margin:24px 0;">
 
-          <h2 style="color:#000;margin-top:30px;">Deliverables</h2>
+          <h2 style="color:#1a1a1a;margin-top:28px;margin-bottom:12px;font-size:17px;font-weight:600;letter-spacing:-0.3px;">Deliverables</h2>
         `;
 
         deliverables.forEach(d => {
-          html += `<h3 style="color:#333;margin-top:20px;">${d.name}</h3><p>${d.description}</p>`;
+          html += `<h3 style="color:#34495e;font-size:14px;font-weight:600;margin-top:16px;margin-bottom:8px;">${d.name}</h3><p style="font-size:13px;line-height:1.5;color:#2c3e50;">${d.description}</p>`;
         });
 
         html += `
-          <hr style="border:none;border-top:1px solid #ddd;margin:30px 0;">
-          <h2 style="color:#000;margin-top:30px;">Project Timeline</h2>
-          <table style="border-collapse:collapse;width:100%;margin:20px 0;">
-            <tr style="background:#000;color:#fff;">
-              <th style="border:1px solid #ccc;padding:12px;text-align:left;">Phase</th>
-              <th style="border:1px solid #ccc;padding:12px;text-align:left;">Duration</th>
-              <th style="border:1px solid #ccc;padding:12px;text-align:left;">Description</th>
+          <hr style="border:none;border-top:1px solid #e0e0e0;margin:24px 0;">
+          <h2 style="color:#1a1a1a;margin-top:28px;margin-bottom:12px;font-size:17px;font-weight:600;letter-spacing:-0.3px;">Project Timeline</h2>
+          <table style="border-collapse:collapse;width:100%;margin:16px 0;font-size:12px;">
+            <tr style="background:#2c3e50;color:#fff;">
+              <th style="border:1px solid #e0e0e0;padding:10px 12px;text-align:left;font-size:12px;font-weight:600;">Phase</th>
+              <th style="border:1px solid #e0e0e0;padding:10px 12px;text-align:left;font-size:12px;font-weight:600;">Duration</th>
+              <th style="border:1px solid #e0e0e0;padding:10px 12px;text-align:left;font-size:12px;font-weight:600;">Description</th>
             </tr>
         `;
 
-        timeline.forEach(t => {
-          html += `<tr><td style="border:1px solid #ccc;padding:12px;">${t.phase}</td><td style="border:1px solid #ccc;padding:12px;">${t.duration}</td><td style="border:1px solid #ccc;padding:12px;">${t.description}</td></tr>`;
+        timeline.forEach((t, i) => {
+          const bgColor = i % 2 === 0 ? 'transparent' : '#f8f9fa';
+          html += `<tr style="background:${bgColor};"><td style="border:1px solid #e0e0e0;padding:10px 12px;font-size:12px;">${t.phase}</td><td style="border:1px solid #e0e0e0;padding:10px 12px;font-size:12px;">${t.duration}</td><td style="border:1px solid #e0e0e0;padding:10px 12px;font-size:12px;">${t.description}</td></tr>`;
         });
 
         html += `
-            <tr style="font-weight:bold;"><td style="border:1px solid #ccc;padding:12px;">Total</td><td style="border:1px solid #ccc;padding:12px;">${timelineTotal}</td><td style="border:1px solid #ccc;padding:12px;"></td></tr>
+            <tr style="font-weight:600;"><td style="border:1px solid #e0e0e0;padding:10px 12px;font-size:12px;">Total</td><td style="border:1px solid #e0e0e0;padding:10px 12px;font-size:12px;">${timelineTotal}</td><td style="border:1px solid #e0e0e0;padding:10px 12px;"></td></tr>
           </table>
-          <p style="font-size:0.9em;color:#555;font-style:italic;">Please note: We operate in a creative capacity, and project timelines are dependent on the client's cooperation, timely responses, and clear direction on project requirements.</p>
-          <hr style="border:none;border-top:1px solid #ddd;margin:30px 0;">
+          <p style="font-size:11px;color:#7f8c8d;font-style:italic;line-height:1.4;">Please note: We operate in a creative capacity, and project timelines are dependent on the client's cooperation, timely responses, and clear direction on project requirements.</p>
+          <hr style="border:none;border-top:1px solid #e0e0e0;margin:24px 0;">
 
-          <h2 style="color:#000;margin-top:30px;">What We Need From You</h2>
-          <ul style="padding-left:20px;">
+          <h2 style="color:#1a1a1a;margin-top:28px;margin-bottom:12px;font-size:17px;font-weight:600;letter-spacing:-0.3px;">What We Need From You</h2>
+          <ul style="padding-left:20px;margin:10px 0;">
         `;
 
         clientNeeds.forEach(need => {
-          html += `<li style="margin:8px 0;">${need}</li>`;
+          html += `<li style="margin:6px 0;font-size:13px;">${need}</li>`;
         });
 
         html += `
           </ul>
-          <hr style="border:none;border-top:1px solid #ddd;margin:30px 0;">
+          <hr style="border:none;border-top:1px solid #e0e0e0;margin:24px 0;">
 
-          <h2 style="color:#000;margin-top:30px;">Investment</h2>
-          <table style="border-collapse:collapse;width:100%;margin:20px 0;">
-            <tr style="background:#000;color:#fff;">
-              <th style="border:1px solid #ccc;padding:12px;text-align:left;">Milestone</th>
-              <th style="border:1px solid #ccc;padding:12px;text-align:left;">Amount</th>
+          <h2 style="color:#1a1a1a;margin-top:28px;margin-bottom:12px;font-size:17px;font-weight:600;letter-spacing:-0.3px;">Investment</h2>
+          <table style="border-collapse:collapse;width:100%;margin:16px 0;font-size:12px;">
+            <tr style="background:#2c3e50;color:#fff;">
+              <th style="border:1px solid #e0e0e0;padding:10px 12px;text-align:left;font-size:12px;font-weight:600;">Milestone</th>
+              <th style="border:1px solid #e0e0e0;padding:10px 12px;text-align:left;font-size:12px;font-weight:600;">Amount</th>
             </tr>
         `;
 
-        milestones.forEach(m => {
-          html += `<tr><td style="border:1px solid #ccc;padding:12px;">${m.name}</td><td style="border:1px solid #ccc;padding:12px;">$${m.amount.toLocaleString()}</td></tr>`;
+        milestones.forEach((m, i) => {
+          const bgColor = i % 2 === 0 ? 'transparent' : '#f8f9fa';
+          html += `<tr style="background:${bgColor};"><td style="border:1px solid #e0e0e0;padding:10px 12px;font-size:12px;">${m.name}</td><td style="border:1px solid #e0e0e0;padding:10px 12px;font-size:12px;">$${m.amount.toLocaleString()}</td></tr>`;
         });
 
         html += `
           </table>
-          <p style="font-size:1.2em;font-weight:bold;">Total Investment: $${totalInvestment.toLocaleString()}</p>
-          <hr style="border:none;border-top:1px solid #ddd;margin:30px 0;">
+          <p style="font-size:13px;font-weight:600;color:#1a1a1a;">Total Investment: $${totalInvestment.toLocaleString()}</p>
+          <hr style="border:none;border-top:1px solid #e0e0e0;margin:24px 0;">
 
-          <h2 style="color:#000;margin-top:30px;">Terms & Conditions</h2>
-          <ul style="padding-left:20px;">
-            <li style="margin:8px 0;">All content and assets must be provided by client before design phase begins</li>
-            <li style="margin:8px 0;">Revisions are included within each phase; additional rounds may incur extra fees</li>
-            <li style="margin:8px 0;">Timeline begins upon receipt of deposit and required materials</li>
-            <li style="margin:8px 0;">Final files delivered upon receipt of final payment</li>
+          <h2 style="color:#1a1a1a;margin-top:28px;margin-bottom:12px;font-size:17px;font-weight:600;letter-spacing:-0.3px;">Terms & Conditions</h2>
+          <ul style="padding-left:20px;margin:10px 0;">
+            <li style="margin:6px 0;font-size:13px;">All content and assets must be provided by client before design phase begins</li>
+            <li style="margin:6px 0;font-size:13px;">Revisions are included within each phase; additional rounds may incur extra fees</li>
+            <li style="margin:6px 0;font-size:13px;">Timeline begins upon receipt of deposit and required materials</li>
+            <li style="margin:6px 0;font-size:13px;">Final files delivered upon receipt of final payment</li>
           </ul>
-          <hr style="border:none;border-top:1px solid #ddd;margin:30px 0;">
-          <p><strong>Wenlaunch Studios</strong><br>${settings.business_email || ''}${settings.business_phone ? '<br>' + settings.business_phone : ''}</p>
+          <hr style="border:none;border-top:1px solid #e0e0e0;margin:24px 0;">
+          <p style="font-size:13px;"><strong style="color:#1a1a1a;font-weight:600;">Wenlaunch Studios</strong><br>${settings.business_email || ''}${settings.business_phone ? '<br>' + settings.business_phone : ''}</p>
         `;
 
         // Open in new window for printing
@@ -880,28 +889,34 @@
             <style>
               body {
                 font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
-                line-height: 1.6;
-                color: #222;
+                line-height: 1.5;
+                color: #2c3e50;
                 padding: 40px;
                 max-width: 8.5in;
                 margin: 0 auto;
+                font-size: 13px;
               }
               @media print {
                 body { padding: 0; }
               }
-              table { border-collapse: collapse; width: 100%; margin: 20px 0; }
-              th, td { border: 1px solid #ccc; padding: 12px; text-align: left; }
-              th { background: #000; color: #fff; }
-              h1 { border-bottom: 2px solid #000; padding-bottom: 10px; }
-              h2 { margin-top: 30px; }
-              hr { border: none; border-top: 1px solid #ddd; margin: 30px 0; }
-              ul { padding-left: 20px; }
-              li { margin: 8px 0; }
+              table { border-collapse: collapse; width: 100%; margin: 16px 0; font-size: 12px; }
+              th, td { border: 1px solid #e0e0e0; padding: 10px 12px; text-align: left; }
+              th { background: #2c3e50; color: #fff; font-weight: 600; font-size: 12px; }
+              h1 { border-bottom: none; padding-bottom: 8px; color: #1a1a1a; font-size: 24px; font-weight: 600; letter-spacing: -0.5px; }
+              h2 { margin-top: 28px; margin-bottom: 12px; color: #1a1a1a; font-size: 17px; font-weight: 600; letter-spacing: -0.3px; }
+              h3 { color: #34495e; font-size: 14px; font-weight: 600; margin-top: 16px; margin-bottom: 8px; }
+              p { margin: 10px 0; font-size: 13px; }
+              hr { border: none; border-top: 1px solid #e0e0e0; margin: 24px 0; }
+              ul { padding-left: 20px; margin: 10px 0; }
+              li { margin: 6px 0; font-size: 13px; }
+              strong { color: #1a1a1a; font-weight: 600; font-size: 13px; }
+              em { font-size: 11px; color: #7f8c8d; }
               .print-btn {
-                background: #000; color: #fff; padding: 12px 24px; border: none;
-                border-radius: 6px; cursor: pointer; font-size: 16px; margin-bottom: 20px;
+                background: #2c3e50; color: #fff; padding: 12px 24px; border: none;
+                border-radius: 6px; cursor: pointer; font-size: 14px; margin-bottom: 20px;
+                font-weight: 500;
               }
-              .print-btn:hover { background: #333; }
+              .print-btn:hover { background: #34495e; }
               @media print { .print-btn { display: none; } }
             </style>
           </head>
