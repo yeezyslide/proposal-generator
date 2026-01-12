@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Proposal Generator</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+      background: #0a0a0a;
+      color: #e5e5e5;
+      line-height: 1.5;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 40px;
+    }
+
+    h1 {
+      font-size: 24px;
+      font-weight: 600;
+      color: #fff;
+    }
+
+    .settings-btn {
+      background: transparent;
+      border: 1px solid #333;
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      color: #999;
+      transition: all 0.2s;
+    }
+
+    .settings-btn:hover { background: #1a1a1a; border-color: #444; color: #fff; }
+
+    .card {
+      background: #141414;
+      border: 1px solid #222;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+
+    .card h2 {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 16px;
+      color: #fff;
+    }
+
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 500;
+      margin-bottom: 6px;
+      color: #888;
+    }
+
+    input, textarea, select {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #333;
+      border-radius: 6px;
+      font-size: 14px;
+      font-family: inherit;
+      margin-bottom: 16px;
+      background: #1a1a1a;
+      color: #e5e5e5;
+      transition: border-color 0.2s;
+    }
+
+    input:focus, textarea:focus, select:focus {
+      outline: none;
+      border-color: #fff;
+    }
+
+    input::placeholder, textarea::placeholder {
+      color: #555;
+    }
+
+    textarea {
+      min-height: 120px;
+      resize: vertical;
+    }
+
+    select {
+      cursor: pointer;
+    }
+
+    .row {
+      display: flex;
+      gap: 16px;
+    }
+
+    .row > * { flex: 1; }
+
+    .list-item {
+      background: #1a1a1a;
+      border: 1px solid #282828;
+      padding: 16px;
+      border-radius: 8px;
+      margin-bottom: 12px;
+      position: relative;
+    }
+
+    .list-item .remove-btn {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: none;
+      border: none;
+      color: #555;
+      cursor: pointer;
+      font-size: 18px;
+      transition: color 0.2s;
+    }
+
+    .list-item .remove-btn:hover { color: #ff4444; }
+
+    .add-btn {
+      background: transparent;
+      border: 1px dashed #333;
+      padding: 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      color: #666;
+      width: 100%;
+      margin-top: 8px;
+      transition: all 0.2s;
+    }
+
+    .add-btn:hover { background: #1a1a1a; border-color: #444; color: #999; }
+
+    .actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 30px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      padding: 14px 28px;
+      border: none;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-primary {
+      background: #fff;
+      color: #000;
+    }
+
+    .btn-primary:hover { background: #e0e0e0; }
+
+    .btn-secondary {
+      background: #222;
+      color: #e5e5e5;
+      border: 1px solid #333;
+    }
+
+    .btn-secondary:hover { background: #2a2a2a; border-color: #444; }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .total-investment {
+      font-size: 20px;
+      font-weight: 600;
+      text-align: right;
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid #333;
+      color: #fff;
+    }
+
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.8);
+      z-index: 100;
+    }
+
+    .modal-overlay.active { display: flex; align-items: center; justify-content: center; }
+
+    .modal {
+      background: #141414;
+      border: 1px solid #222;
+      border-radius: 12px;
+      padding: 24px;
+      max-width: 500px;
+      width: 90%;
+    }
+
+    .modal h2 {
+      margin-bottom: 20px;
+      color: #fff;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 12px;
+      justify-content: flex-end;
+      margin-top: 20px;
+    }
+
+    .status {
+      padding: 12px 16px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      display: none;
+    }
+
+    .status.success { display: block; background: #0d2818; color: #4ade80; border: 1px solid #166534; }
+    .status.error { display: block; background: #2d1215; color: #f87171; border: 1px solid #991b1b; }
+    .status.loading { display: block; background: #2d2305; color: #fbbf24; border: 1px solid #854d0e; }
+
+    .client-needs-list input {
+      margin-bottom: 8px;
+    }
+
+    #email-content {
+      background: #1a1a1a !important;
+      border: 1px solid #282828;
+      color: #e5e5e5;
+    }
+
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #1a1a1a;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #333;
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #444;
+    }
+
+    /* Login screen */
+    .login-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: #0a0a0a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+
+    .login-box {
+      background: #141414;
+      border: 1px solid #222;
+      border-radius: 12px;
+      padding: 40px;
+      width: 100%;
+      max-width: 400px;
+      text-align: center;
+    }
+
+    .login-box h1 {
+      margin-bottom: 8px;
+      font-size: 24px;
+    }
+
+    .login-box p {
+      color: #666;
+      margin-bottom: 24px;
+    }
+
+    .login-box input {
+      text-align: center;
+      font-size: 18px;
+      letter-spacing: 4px;
+    }
+
+    .login-error {
+      color: #f87171;
+      margin-bottom: 16px;
+      display: none;
+    }
+
+    .app-content {
+      display: none;
+    }
+
+    .app-content.visible {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <!-- Login Screen -->
+  <div class="login-screen" id="loginScreen">
+    <div class="login-box">
+      <h1>Proposal Generator</h1>
+      <p>Enter password to continue</p>
+      <div class="login-error" id="loginError">Invalid password</div>
+      <input type="password" id="passwordInput" placeholder="Password" autofocus>
+      <button class="btn btn-primary" onclick="login()" style="width: 100%; margin-top: 16px;">
+        Enter
+      </button>
+    </div>
+  </div>
+
+  <div class="app-content" id="appContent">
+  <div class="container">
+    <header>
+      <h1>Proposal Generator</h1>
+      <button class="settings-btn" onclick="openSettings()">Settings</button>
+    </header>
+
+    <div id="status" class="status"></div>
+
+    <!-- Client Info -->
+    <div class="card">
+      <h2>Client Information</h2>
+      <div class="row">
+        <div>
+          <label>Client / Company Name</label>
+          <input type="text" id="client_name" placeholder="Acme Corp">
+        </div>
+      </div>
+    </div>
+
+    <!-- Transcript -->
+    <div class="card">
+      <h2>Meeting Transcript</h2>
+      <label>Paste your transcript or meeting notes</label>
+      <textarea id="transcript" placeholder="Paste the meeting transcript here..."></textarea>
+      <label>Additional Notes (optional)</label>
+      <textarea id="notes" style="min-height: 80px;" placeholder="Any extra context..."></textarea>
+      <button class="btn btn-secondary" onclick="analyzeTranscript()" id="analyzeBtn">
+        Analyze with AI
+      </button>
+    </div>
+
+    <!-- Project Summary -->
+    <div class="card">
+      <h2>Project Summary</h2>
+      <textarea id="project_summary" style="min-height: 150px;" placeholder="This will be auto-generated from your transcript, or you can write it manually..."></textarea>
+    </div>
+
+    <!-- Deliverables -->
+    <div class="card">
+      <h2>Deliverables</h2>
+      <div id="deliverables-list"></div>
+      <button class="add-btn" onclick="addDeliverable()">+ Add Deliverable</button>
+    </div>
+
+    <!-- Timeline -->
+    <div class="card">
+      <h2>Project Timeline</h2>
+      <div id="timeline-list"></div>
+      <button class="add-btn" onclick="addTimelinePhase()">+ Add Phase</button>
+      <div class="total-investment" style="border-top: 1px solid #ddd;">
+        Total Duration: <span id="timeline-total">0 days</span>
+      </div>
+    </div>
+
+    <!-- Client Needs -->
+    <div class="card">
+      <h2>What We Need From Client</h2>
+      <div id="client-needs-list" class="client-needs-list"></div>
+      <button class="add-btn" onclick="addClientNeed()">+ Add Item</button>
+    </div>
+
+    <!-- Payment Milestones -->
+    <div class="card">
+      <h2>Payment Milestones</h2>
+      <div id="milestones-list"></div>
+      <button class="add-btn" onclick="addMilestone()">+ Add Milestone</button>
+      <div class="total-investment">
+        Total: $<span id="total-investment">0</span>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="actions">
+      <button class="btn btn-primary" onclick="generatePdf()" id="generateBtn">
+        Generate PDF
+      </button>
+      <button class="btn btn-secondary" onclick="generateEmail()">
+        Generate Email
+      </button>
+      <button class="btn btn-secondary" onclick="clearForm()">
+        Clear All
+      </button>
+    </div>
+
+    <!-- Email Preview -->
+    <div class="card" id="email-card" style="display: none;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+        <h2 style="margin: 0;">Email Draft</h2>
+        <button class="btn btn-primary" onclick="copyEmail()" style="padding: 8px 16px;">
+          Copy to Clipboard
+        </button>
+      </div>
+      <div id="email-content" style="background: #f9f9f9; padding: 20px; border-radius: 8px; white-space: pre-wrap; font-family: inherit; line-height: 1.6;"></div>
+    </div>
+  </div>
+  </div>
+
+  <!-- Settings Modal -->
+  <div class="modal-overlay" id="settingsModal">
+    <div class="modal">
+      <h2>Settings</h2>
+      <label>Business Name</label>
+      <input type="text" id="settings_business_name" placeholder="Your Design Studio">
+      <label>Email</label>
+      <input type="email" id="settings_business_email" placeholder="hello@example.com">
+      <label>Phone</label>
+      <input type="text" id="settings_business_phone" placeholder="(555) 123-4567">
+      <div class="modal-actions">
+        <button class="btn btn-secondary" onclick="closeSettings()">Cancel</button>
+        <button class="btn btn-primary" onclick="saveSettings()">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let settings = {};
+    let authToken = localStorage.getItem('authToken') || '';
+
+    // Auth functions
+    async function login() {
+      const password = document.getElementById('passwordInput').value;
+      try {
+        const res = await fetch('/api/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ password })
+        });
+        const data = await res.json();
+        if (data.success) {
+          authToken = data.token;
+          localStorage.setItem('authToken', authToken);
+          showApp();
+        } else {
+          document.getElementById('loginError').style.display = 'block';
+        }
+      } catch (e) {
+        document.getElementById('loginError').style.display = 'block';
+      }
+    }
+
+    function showApp() {
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('appContent').classList.add('visible');
+      loadSettings();
+    }
+
+    async function checkAuth() {
+      if (!authToken) return false;
+      try {
+        const res = await fetch('/api/auth-check', {
+          headers: { 'X-Auth-Token': authToken }
+        });
+        const data = await res.json();
+        return data.authenticated;
+      } catch (e) {
+        return false;
+      }
+    }
+
+    // Helper for authenticated fetch
+    function authFetch(url, options = {}) {
+      options.headers = options.headers || {};
+      options.headers['X-Auth-Token'] = authToken;
+      return fetch(url, options);
+    }
+
+    // Enter key to submit password
+    document.getElementById('passwordInput').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') login();
+    });
+
+    // Check auth on page load
+    checkAuth().then(isAuth => {
+      if (isAuth) {
+        showApp();
+      }
+    });
+
+    // Load settings on page load
+    async function loadSettings() {
+      try {
+        const res = await authFetch('/api/settings');
+        settings = await res.json();
+        document.getElementById('settings_business_name').value = settings.business_name || '';
+        document.getElementById('settings_business_email').value = settings.business_email || '';
+        document.getElementById('settings_business_phone').value = settings.business_phone || '';
+      } catch (e) {
+        console.error('Failed to load settings:', e);
+      }
+    }
+
+    function openSettings() {
+      document.getElementById('settingsModal').classList.add('active');
+    }
+
+    function closeSettings() {
+      document.getElementById('settingsModal').classList.remove('active');
+    }
+
+    async function saveSettings() {
+      settings = {
+        business_name: document.getElementById('settings_business_name').value,
+        business_email: document.getElementById('settings_business_email').value,
+        business_phone: document.getElementById('settings_business_phone').value
+      };
+      await authFetch('/api/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(settings)
+      });
+      closeSettings();
+      showStatus('Settings saved!', 'success');
+    }
+
+    function showStatus(message, type) {
+      const status = document.getElementById('status');
+      status.textContent = message;
+      status.className = 'status ' + type;
+      if (type !== 'loading') {
+        setTimeout(() => { status.className = 'status'; }, 3000);
+      }
+    }
+
+    // Deliverables
+    function addDeliverable(name = '', description = '') {
+      const list = document.getElementById('deliverables-list');
+      const item = document.createElement('div');
+      item.className = 'list-item';
+      item.innerHTML = `
+        <button class="remove-btn" onclick="this.parentElement.remove()">&times;</button>
+        <label>Name</label>
+        <input type="text" class="deliverable-name" value="${escapeHtml(name)}" placeholder="Homepage Design">
+        <label>Description</label>
+        <textarea class="deliverable-desc" placeholder="What this includes...">${escapeHtml(description)}</textarea>
+      `;
+      list.appendChild(item);
+    }
+
+    // Timeline
+    function addTimelinePhase(phase = '', durationNum = '', durationUnit = 'weeks', description = '') {
+      // Parse duration if it's a string like "2 weeks"
+      if (typeof durationNum === 'string' && durationNum.includes(' ')) {
+        const match = durationNum.match(/(\d+)\s*(day|days|week|weeks)/i);
+        if (match) {
+          durationNum = match[1];
+          durationUnit = match[2].toLowerCase().startsWith('day') ? 'days' : 'weeks';
+        }
+      }
+
+      const list = document.getElementById('timeline-list');
+      const item = document.createElement('div');
+      item.className = 'list-item';
+      item.innerHTML = `
+        <button class="remove-btn" onclick="this.parentElement.remove(); updateTimelineTotal()">&times;</button>
+        <div class="row">
+          <div style="flex: 2;">
+            <label>Phase</label>
+            <input type="text" class="phase-name" value="${escapeHtml(phase)}" placeholder="Design">
+          </div>
+          <div style="flex: 1;">
+            <label>Duration</label>
+            <input type="number" class="phase-duration-num" value="${escapeHtml(String(durationNum))}" placeholder="2" min="1" oninput="updateTimelineTotal()">
+          </div>
+          <div style="flex: 1;">
+            <label>Unit</label>
+            <select class="phase-duration-unit" onchange="updateTimelineTotal()">
+              <option value="days" ${durationUnit === 'days' ? 'selected' : ''}>Days</option>
+              <option value="weeks" ${durationUnit === 'weeks' ? 'selected' : ''}>Weeks</option>
+            </select>
+          </div>
+        </div>
+        <label>Description</label>
+        <input type="text" class="phase-desc" value="${escapeHtml(description)}" placeholder="What happens in this phase">
+      `;
+      list.appendChild(item);
+      updateTimelineTotal();
+    }
+
+    function updateTimelineTotal() {
+      let totalDays = 0;
+      document.querySelectorAll('#timeline-list .list-item').forEach(item => {
+        const num = parseFloat(item.querySelector('.phase-duration-num').value) || 0;
+        const unit = item.querySelector('.phase-duration-unit').value;
+        if (unit === 'weeks') {
+          totalDays += num * 7; // 7 days per week
+        } else {
+          totalDays += num;
+        }
+      });
+
+      // Convert to weeks and days
+      const weeks = Math.floor(totalDays / 7);
+      const days = totalDays % 7;
+
+      let totalText = '';
+      if (weeks > 0 && days > 0) {
+        totalText = `${weeks} week${weeks !== 1 ? 's' : ''}, ${days} day${days !== 1 ? 's' : ''}`;
+      } else if (weeks > 0) {
+        totalText = `${weeks} week${weeks !== 1 ? 's' : ''}`;
+      } else if (days > 0) {
+        totalText = `${days} day${days !== 1 ? 's' : ''}`;
+      } else {
+        totalText = '0 days';
+      }
+
+      document.getElementById('timeline-total').textContent = totalText;
+    }
+
+    // Client Needs
+    function addClientNeed(need = '') {
+      const list = document.getElementById('client-needs-list');
+      const item = document.createElement('div');
+      item.className = 'list-item';
+      item.style.padding = '8px 40px 8px 12px';
+      item.innerHTML = `
+        <button class="remove-btn" onclick="this.parentElement.remove()">&times;</button>
+        <input type="text" class="client-need" value="${escapeHtml(need)}" placeholder="Brand guidelines, logo files, etc." style="margin-bottom: 0;">
+      `;
+      list.appendChild(item);
+    }
+
+    // Milestones
+    function addMilestone(name = '', amount = '') {
+      const list = document.getElementById('milestones-list');
+      const item = document.createElement('div');
+      item.className = 'list-item';
+      item.innerHTML = `
+        <button class="remove-btn" onclick="this.parentElement.remove(); updateTotal()">&times;</button>
+        <div class="row">
+          <div style="flex: 2;">
+            <label>Milestone</label>
+            <input type="text" class="milestone-name" value="${escapeHtml(name)}" placeholder="Upon agreement">
+          </div>
+          <div style="flex: 1;">
+            <label>Amount ($)</label>
+            <input type="number" class="milestone-amount" value="${amount}" placeholder="1500" oninput="updateTotal()">
+          </div>
+        </div>
+      `;
+      list.appendChild(item);
+      updateTotal();
+    }
+
+    function updateTotal() {
+      const amounts = document.querySelectorAll('.milestone-amount');
+      let total = 0;
+      amounts.forEach(input => {
+        total += parseFloat(input.value) || 0;
+      });
+      document.getElementById('total-investment').textContent = total.toLocaleString();
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    // Analyze with AI
+    async function analyzeTranscript() {
+      const transcript = document.getElementById('transcript').value;
+      const notes = document.getElementById('notes').value;
+
+      if (!transcript.trim()) {
+        showStatus('Please enter a transcript first', 'error');
+        return;
+      }
+
+      const btn = document.getElementById('analyzeBtn');
+      btn.disabled = true;
+      btn.textContent = 'Analyzing...';
+      showStatus('Analyzing transcript with AI...', 'loading');
+
+      try {
+        const res = await authFetch('/api/analyze', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ transcript, notes })
+        });
+
+        if (!res.ok) {
+          const err = await res.json();
+          throw new Error(err.error || 'Analysis failed');
+        }
+
+        const data = await res.json();
+
+        // Populate form
+        document.getElementById('client_name').value = data.client_name || '';
+        document.getElementById('project_summary').value = data.project_summary || '';
+
+        // Clear and populate deliverables
+        document.getElementById('deliverables-list').innerHTML = '';
+        (data.deliverables || []).forEach(d => addDeliverable(d.name, d.description));
+
+        // Clear and populate timeline
+        document.getElementById('timeline-list').innerHTML = '';
+        (data.timeline || []).forEach(t => addTimelinePhase(t.phase, t.duration, 'weeks', t.description));
+
+        // Clear and populate client needs
+        document.getElementById('client-needs-list').innerHTML = '';
+        (data.client_needs || []).forEach(n => addClientNeed(n));
+
+        showStatus('Analysis complete! Review and edit as needed.', 'success');
+      } catch (e) {
+        showStatus('Error: ' + e.message, 'error');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Analyze with AI';
+      }
+    }
+
+    // Generate PDF
+    async function generatePdf() {
+      const btn = document.getElementById('generateBtn');
+      btn.disabled = true;
+      btn.textContent = 'Generating...';
+      showStatus('Generating PDF...', 'loading');
+
+      try {
+        // Gather all form data
+        const data = {
+          client_name: document.getElementById('client_name').value,
+          project_summary: document.getElementById('project_summary').value,
+          business_name: settings.business_name,
+          business_email: settings.business_email,
+          business_phone: settings.business_phone,
+          deliverables: [],
+          timeline: [],
+          client_needs: [],
+          milestones: []
+        };
+
+        // Deliverables
+        document.querySelectorAll('#deliverables-list .list-item').forEach(item => {
+          data.deliverables.push({
+            name: item.querySelector('.deliverable-name').value,
+            description: item.querySelector('.deliverable-desc').value
+          });
+        });
+
+        // Timeline
+        document.querySelectorAll('#timeline-list .list-item').forEach(item => {
+          const num = item.querySelector('.phase-duration-num').value;
+          const unit = item.querySelector('.phase-duration-unit').value;
+          data.timeline.push({
+            phase: item.querySelector('.phase-name').value,
+            duration: `${num} ${unit}`,
+            description: item.querySelector('.phase-desc').value
+          });
+        });
+
+        // Add timeline total
+        data.timeline_total = document.getElementById('timeline-total').textContent;
+
+        // Client needs
+        document.querySelectorAll('#client-needs-list .client-need').forEach(input => {
+          if (input.value.trim()) data.client_needs.push(input.value);
+        });
+
+        // Milestones
+        document.querySelectorAll('#milestones-list .list-item').forEach(item => {
+          data.milestones.push({
+            name: item.querySelector('.milestone-name').value,
+            amount: item.querySelector('.milestone-amount').value
+          });
+        });
+
+        const res = await authFetch('/api/generate-pdf', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+
+        if (!res.ok) {
+          const err = await res.json();
+          throw new Error(err.error || 'PDF generation failed');
+        }
+
+        // Download the PDF
+        const blob = await res.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `proposal-${data.client_name || 'proposal'}.pdf`;
+        a.click();
+        window.URL.revokeObjectURL(url);
+
+        showStatus('PDF generated and downloaded!', 'success');
+      } catch (e) {
+        showStatus('Error: ' + e.message, 'error');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Generate PDF';
+      }
+    }
+
+    function clearForm() {
+      if (!confirm('Clear all form data?')) return;
+      document.getElementById('client_name').value = '';
+      document.getElementById('transcript').value = '';
+      document.getElementById('notes').value = '';
+      document.getElementById('project_summary').value = '';
+      document.getElementById('deliverables-list').innerHTML = '';
+      document.getElementById('timeline-list').innerHTML = '';
+      document.getElementById('client-needs-list').innerHTML = '';
+      document.getElementById('milestones-list').innerHTML = '';
+      updateTotal();
+    }
+
+    // Generate Email
+    function generateEmail() {
+      const clientName = document.getElementById('client_name').value || 'there';
+      const businessName = 'Wenlaunch Studios';
+
+      // Get deliverables
+      const deliverables = [];
+      document.querySelectorAll('#deliverables-list .list-item').forEach(item => {
+        const name = item.querySelector('.deliverable-name').value;
+        if (name) deliverables.push(name);
+      });
+
+      // Get timeline total
+      const timelineTotal = document.getElementById('timeline-total').textContent;
+
+      // Get total investment
+      let totalInvestment = 0;
+      document.querySelectorAll('.milestone-amount').forEach(input => {
+        totalInvestment += parseFloat(input.value) || 0;
+      });
+
+      // Build email
+      const email = `Hi ${clientName.split(' ')[0]},
+
+Thank you for taking the time to meet with me to discuss your project. I'm excited about the opportunity to work together!
+
+I've put together a proposal based on our conversation. Here's a quick overview:
+
+Deliverables:
+${deliverables.map(d => `• ${d}`).join('\n')}
+
+Timeline: ${timelineTotal}
+
+Investment: $${totalInvestment.toLocaleString()}
+
+I've attached the full proposal with all the details, including the project timeline, what I'll need from you to get started, and payment milestones.
+
+Please take a look and let me know if you have any questions or would like to discuss anything further. I'm happy to hop on a quick call if that's easier.
+
+Looking forward to hearing from you!
+
+Best,
+${businessName}`;
+
+      document.getElementById('email-content').textContent = email;
+      document.getElementById('email-card').style.display = 'block';
+      document.getElementById('email-card').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function copyEmail() {
+      const emailText = document.getElementById('email-content').textContent;
+      navigator.clipboard.writeText(emailText).then(() => {
+        showStatus('Email copied to clipboard!', 'success');
+      }).catch(err => {
+        showStatus('Failed to copy', 'error');
+      });
+    }
+
+    // Initialize
+    loadSettings();
+
+    // Add some default empty items
+    addDeliverable();
+    addTimelinePhase();
+    addClientNeed();
+    addMilestone('Upon agreement', '');
+    addMilestone('Upon design approval', '');
+    addMilestone('Upon completion', '');
+  </script>
+</body>
+</html>
