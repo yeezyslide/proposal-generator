@@ -860,16 +860,27 @@
         container.style.fontFamily = '-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif';
         container.style.lineHeight = '1.6';
         container.style.color = '#222';
+        container.style.background = '#fff';
+        container.style.position = 'absolute';
+        container.style.left = '-9999px';
+        container.style.top = '0';
+        container.style.width = '8.5in';
+
+        // Must add to DOM for html2pdf to render
+        document.body.appendChild(container);
 
         const opt = {
           margin: 0.75,
           filename: `proposal-${result.client_name || 'proposal'}.pdf`,
           image: { type: 'jpeg', quality: 0.98 },
-          html2canvas: { scale: 2 },
+          html2canvas: { scale: 2, useCORS: true },
           jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
         };
 
         await html2pdf().set(opt).from(container).save();
+
+        // Clean up
+        document.body.removeChild(container);
 
         showStatus('PDF generated and downloaded!', 'success');
       } catch (e) {
