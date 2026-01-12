@@ -351,6 +351,10 @@
           <label>Client / Company Name</label>
           <input type="text" id="client_name" placeholder="Acme Corp">
         </div>
+        <div>
+          <label>Proposal Name</label>
+          <input type="text" id="proposal_name" placeholder="Website Redesign">
+        </div>
       </div>
     </div>
 
@@ -442,6 +446,9 @@
       <input type="email" id="settings_business_email" placeholder="hello@example.com">
       <label>Phone</label>
       <input type="text" id="settings_business_phone" placeholder="(555) 123-4567">
+      <label>Studio Logo</label>
+      <input type="file" id="settings_logo" accept="image/*" style="margin-bottom: 12px;">
+      <div id="logo-preview" style="margin-bottom: 12px;"></div>
       <div class="modal-actions">
         <button class="btn btn-secondary" onclick="closeSettings()">Cancel</button>
         <button class="btn btn-primary" onclick="saveSettings()">Save</button>
@@ -523,9 +530,19 @@
         document.getElementById('settings_business_name').value = settings.business_name || '';
         document.getElementById('settings_business_email').value = settings.business_email || '';
         document.getElementById('settings_business_phone').value = settings.business_phone || '';
+        
+        // Show logo preview if exists
+        if (settings.logo_base64) {
+          showLogoPreview(settings.logo_base64);
+        }
       } catch (e) {
         console.error('Failed to load settings:', e);
       }
+    }
+
+    function showLogoPreview(base64) {
+      const preview = document.getElementById('logo-preview');
+      preview.innerHTML = `<img src="${base64}" style="max-width: 200px; max-height: 100px; border: 1px solid #333; border-radius: 4px;">`;
     }
 
     function openSettings() {
@@ -537,14 +554,34 @@
     }
 
     async function saveSettings() {
-      settings = {
-        business_name: document.getElementById('settings_business_name').value,
-        business_email: document.getElementById('settings_business_email').value,
-        business_phone: document.getElementById('settings_business_phone').value
-      };
-      localStorage.setItem('proposalSettings', JSON.stringify(settings));
-      closeSettings();
-      showStatus('Settings saved!', 'success');
+      const logoFile = document.getElementById('settings_logo').files[0];
+      
+      // Convert logo to base64 if uploaded
+      if (logoFile) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          settings = {
+            business_name: document.getElementById('settings_business_name').value,
+            business_email: document.getElementById('settings_business_email').value,
+            business_phone: document.getElementById('settings_business_phone').value,
+            logo_base64: e.target.result
+          };
+          localStorage.setItem('proposalSettings', JSON.stringify(settings));
+          closeSettings();
+          showStatus('Settings saved!', 'success');
+        };
+        reader.readAsDataURL(logoFile);
+      } else {
+        settings = {
+          business_name: document.getElementById('settings_business_name').value,
+          business_email: document.getElementById('settings_business_email').value,
+          business_phone: document.getElementById('settings_business_phone').value,
+          logo_base64: settings.logo_base64 // Keep existing logo
+        };
+        localStorage.setItem('proposalSettings', JSON.stringify(settings));
+        closeSettings();
+        showStatus('Settings saved!', 'success');
+      }
     }
 
     function showStatus(message, type) {
@@ -755,6 +792,7 @@
       try {
         // Gather all form data
         const clientName = document.getElementById('client_name').value || 'Client';
+        const proposalName = document.getElementById('proposal_name').value || 'Proposal';
         const projectSummary = document.getElementById('project_summary').value || '';
         const timelineTotal = document.getElementById('timeline-total').textContent;
 
@@ -792,8 +830,9 @@
 
         // Build HTML directly with logo
         let logoHtml = '';
-        // Embed logo as base64 - you'll need to convert your logo.jpg to base64
-        // For now, it will show without logo, but you can add it by converting logo.jpg to base64
+        if (settings.logo_base64) {
+          logoHtml = `<img src="${settings.logo_base64}" style="max-width: 160px; max-height: 70px; object-fit: contain; display: block;">`;
+        }
         
         let html = `
           <div style="margin-bottom:25px;border-bottom:1px solid #e0e0e0;padding-bottom:15px;">
@@ -876,7 +915,7 @@
             <li style="margin:6px 0;font-size:13px;">Final files delivered upon receipt of final payment</li>
           </ul>
           <hr style="border:none;border-top:1px solid #e0e0e0;margin:24px 0;">
-          <p style="font-size:13px;"><strong style="color:#1a1a1a;font-weight:600;">Wenlaunch Studios</strong><br>${settings.business_email || ''}${settings.business_phone ? '<br>' + settings.business_phone : ''}</p>
+          <p style="font-size:13px;"><strong style="color:#1a1a1a;font-weight:600;">Wenlaunch Studios</strong><br>Mason Price<br>mason@wenlaunch.io</p>
         `;
 
         // Open in new window for printing
@@ -885,7 +924,7 @@
           <!DOCTYPE html>
           <html>
           <head>
-            <title>Proposal - ${clientName}</title>
+            <title>${proposalName} - ${clientName}</title>
             <style>
               @page {
                 margin: 0.5in;
@@ -951,6 +990,7 @@
     function clearForm() {
       if (!confirm('Clear all form data?')) return;
       document.getElementById('client_name').value = '';
+      document.getElementById('proposal_name').value = '';
       document.getElementById('transcript').value = '';
       document.getElementById('notes').value = '';
       document.getElementById('project_summary').value = '';
@@ -1032,6 +1072,7 @@ ${businessName}`;
     function saveFormData() {
       const formData = {
         client_name: document.getElementById('client_name').value,
+        proposal_name: document.getElementById('proposal_name').value,
         transcript: document.getElementById('transcript').value,
         notes: document.getElementById('notes').value,
         project_summary: document.getElementById('project_summary').value,
@@ -1093,6 +1134,7 @@ ${businessName}`;
 
         // Load basic fields
         document.getElementById('client_name').value = formData.client_name || '';
+        document.getElementById('proposal_name').value = formData.proposal_name || '';
         document.getElementById('transcript').value = formData.transcript || '';
         document.getElementById('notes').value = formData.notes || '';
         document.getElementById('project_summary').value = formData.project_summary || '';
@@ -1151,7 +1193,7 @@ ${businessName}`;
     // Add event listeners for auto-save
     function setupAutoSave() {
       // Save on input for text fields
-      ['client_name', 'transcript', 'notes', 'project_summary'].forEach(id => {
+      ['client_name', 'proposal_name', 'transcript', 'notes', 'project_summary'].forEach(id => {
         const element = document.getElementById(id);
         if (element) {
           element.addEventListener('input', debouncedSave);
