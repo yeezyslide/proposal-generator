@@ -948,6 +948,15 @@
       document.getElementById('client-needs-list').innerHTML = '';
       document.getElementById('milestones-list').innerHTML = '';
       updateTotal();
+      
+      // Clear saved data and reload defaults
+      localStorage.removeItem('proposalFormData');
+      addDeliverable();
+      addTimelinePhase();
+      addClientNeed();
+      addMilestone('Upon agreement', '');
+      addMilestone('Upon design approval', '');
+      addMilestone('Upon completion', '');
     }
 
     // Generate Email
@@ -1008,16 +1017,150 @@ ${businessName}`;
       });
     }
 
+    // Auto-save functionality
+    function saveFormData() {
+      const formData = {
+        client_name: document.getElementById('client_name').value,
+        transcript: document.getElementById('transcript').value,
+        notes: document.getElementById('notes').value,
+        project_summary: document.getElementById('project_summary').value,
+        deliverables: [],
+        timeline: [],
+        client_needs: [],
+        milestones: []
+      };
+
+      // Save deliverables
+      document.querySelectorAll('#deliverables-list .list-item').forEach(item => {
+        formData.deliverables.push({
+          name: item.querySelector('.deliverable-name').value,
+          description: item.querySelector('.deliverable-desc').value
+        });
+      });
+
+      // Save timeline
+      document.querySelectorAll('#timeline-list .list-item').forEach(item => {
+        formData.timeline.push({
+          phase: item.querySelector('.phase-name').value,
+          durationNum: item.querySelector('.phase-duration-num').value,
+          durationUnit: item.querySelector('.phase-duration-unit').value,
+          description: item.querySelector('.phase-desc').value
+        });
+      });
+
+      // Save client needs
+      document.querySelectorAll('#client-needs-list .client-need').forEach(input => {
+        formData.client_needs.push(input.value);
+      });
+
+      // Save milestones
+      document.querySelectorAll('#milestones-list .list-item').forEach(item => {
+        formData.milestones.push({
+          name: item.querySelector('.milestone-name').value,
+          amount: item.querySelector('.milestone-amount').value
+        });
+      });
+
+      localStorage.setItem('proposalFormData', JSON.stringify(formData));
+    }
+
+    function loadFormData() {
+      try {
+        const saved = localStorage.getItem('proposalFormData');
+        if (!saved) {
+          // Add default items if no saved data
+          addDeliverable();
+          addTimelinePhase();
+          addClientNeed();
+          addMilestone('Upon agreement', '');
+          addMilestone('Upon design approval', '');
+          addMilestone('Upon completion', '');
+          return;
+        }
+
+        const formData = JSON.parse(saved);
+
+        // Load basic fields
+        document.getElementById('client_name').value = formData.client_name || '';
+        document.getElementById('transcript').value = formData.transcript || '';
+        document.getElementById('notes').value = formData.notes || '';
+        document.getElementById('project_summary').value = formData.project_summary || '';
+
+        // Load deliverables
+        if (formData.deliverables && formData.deliverables.length > 0) {
+          formData.deliverables.forEach(d => addDeliverable(d.name, d.description));
+        } else {
+          addDeliverable();
+        }
+
+        // Load timeline
+        if (formData.timeline && formData.timeline.length > 0) {
+          formData.timeline.forEach(t => addTimelinePhase(t.phase, t.durationNum, t.durationUnit, t.description));
+        } else {
+          addTimelinePhase();
+        }
+
+        // Load client needs
+        if (formData.client_needs && formData.client_needs.length > 0) {
+          formData.client_needs.forEach(n => addClientNeed(n));
+        } else {
+          addClientNeed();
+        }
+
+        // Load milestones
+        if (formData.milestones && formData.milestones.length > 0) {
+          formData.milestones.forEach(m => addMilestone(m.name, m.amount));
+        } else {
+          addMilestone('Upon agreement', '');
+          addMilestone('Upon design approval', '');
+          addMilestone('Upon completion', '');
+        }
+
+        updateTotal();
+        updateTimelineTotal();
+      } catch (e) {
+        console.error('Failed to load form data:', e);
+        // Add default items on error
+        addDeliverable();
+        addTimelinePhase();
+        addClientNeed();
+        addMilestone('Upon agreement', '');
+        addMilestone('Upon design approval', '');
+        addMilestone('Upon completion', '');
+      }
+    }
+
+    // Auto-save on input changes (debounced)
+    let saveTimeout;
+    function debouncedSave() {
+      clearTimeout(saveTimeout);
+      saveTimeout = setTimeout(saveFormData, 500); // Save 500ms after user stops typing
+    }
+
+    // Add event listeners for auto-save
+    function setupAutoSave() {
+      // Save on input for text fields
+      ['client_name', 'transcript', 'notes', 'project_summary'].forEach(id => {
+        const element = document.getElementById(id);
+        if (element) {
+          element.addEventListener('input', debouncedSave);
+        }
+      });
+
+      // Use MutationObserver to detect when list items are added/removed
+      const observer = new MutationObserver(debouncedSave);
+      ['deliverables-list', 'timeline-list', 'client-needs-list', 'milestones-list'].forEach(id => {
+        const element = document.getElementById(id);
+        if (element) {
+          observer.observe(element, { childList: true, subtree: true, characterData: true });
+        }
+      });
+    }
+
     // Initialize
     loadSettings();
-
-    // Add some default empty items
-    addDeliverable();
-    addTimelinePhase();
-    addClientNeed();
-    addMilestone('Upon agreement', '');
-    addMilestone('Upon design approval', '');
-    addMilestone('Upon completion', '');
+    loadFormData(); // Load saved form data
+    setupAutoSave(); // Setup auto-save listeners
   </script>
 </body>
 </html>
