@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Proposal Generator</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -513,11 +514,13 @@
       }
     });
 
-    // Load settings on page load
+    // Load settings from localStorage
     async function loadSettings() {
       try {
-        const res = await authFetch('/api/settings');
-        settings = await res.json();
+        const stored = localStorage.getItem('proposalSettings');
+        if (stored) {
+          settings = JSON.parse(stored);
+        }
         document.getElementById('settings_business_name').value = settings.business_name || '';
         document.getElementById('settings_business_email').value = settings.business_email || '';
         document.getElementById('settings_business_phone').value = settings.business_phone || '';
@@ -540,11 +543,7 @@
         business_email: document.getElementById('settings_business_email').value,
         business_phone: document.getElementById('settings_business_phone').value
       };
-      await authFetch('/api/settings', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(settings)
-      });
+      localStorage.setItem('proposalSettings', JSON.stringify(settings));
       closeSettings();
       showStatus('Settings saved!', 'success');
     }
@@ -747,6 +746,43 @@
       }
     }
 
+    // Simple markdown to HTML converter
+    function markdownToHtml(md) {
+      let html = md
+        // Headers
+        .replace(/^### (.*$)/gm, '<h3 style="color:#333;margin-top:20px;">$1</h3>')
+        .replace(/^## (.*$)/gm, '<h2 style="color:#000;margin-top:30px;border-bottom:1px solid #ddd;padding-bottom:8px;">$1</h2>')
+        .replace(/^# (.*$)/gm, '<h1 style="color:#000;border-bottom:2px solid #000;padding-bottom:10px;">$1</h1>')
+        // Bold
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        // Italic
+        .replace(/\*(.*?)\*/g, '<em style="font-size:0.9em;color:#555;">$1</em>')
+        // Horizontal rule
+        .replace(/^---$/gm, '<hr style="border:none;border-top:1px solid #ddd;margin:30px 0;">')
+        // Unordered lists
+        .replace(/^- (.*$)/gm, '<li style="margin:8px 0;">$1</li>')
+        // Line breaks
+        .replace(/\n\n/g, '</p><p style="margin:16px 0;">')
+        .replace(/\n/g, '<br>');
+
+      // Wrap in paragraphs
+      html = '<p style="margin:16px 0;">' + html + '</p>';
+
+      // Fix lists
+      html = html.replace(/(<li.*?<\/li>)+/g, '<ul style="padding-left:20px;margin:16px 0;">$&</ul>');
+
+      // Tables
+      html = html.replace(/\|(.+)\|/g, (match) => {
+        const cells = match.split('|').filter(c => c.trim());
+        if (cells.some(c => c.includes('---'))) return '';
+        const cellHtml = cells.map(c => `<td style="border:1px solid #ccc;padding:12px;">${c.trim()}</td>`).join('');
+        return `<tr>${cellHtml}</tr>`;
+      });
+      html = html.replace(/(<tr>.*<\/tr>)+/gs, '<table style="border-collapse:collapse;width:100%;margin:20px 0;">$&</table>');
+
+      return html;
+    }
+
     // Generate PDF
     async function generatePdf() {
       const btn = document.getElementById('generateBtn');
@@ -814,14 +850,26 @@
           throw new Error(err.error || 'PDF generation failed');
         }
 
-        // Download the PDF
-        const blob = await res.blob();
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `proposal-${data.client_name || 'proposal'}.pdf`;
-        a.click();
-        window.URL.revokeObjectURL(url);
+        const result = await res.json();
+
+        // Convert markdown to HTML and generate PDF client-side
+        const html = markdownToHtml(result.markdown);
+        const container = document.createElement('div');
+        container.innerHTML = html;
+        container.style.padding = '40px';
+        container.style.fontFamily = '-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif';
+        container.style.lineHeight = '1.6';
+        container.style.color = '#222';
+
+        const opt = {
+          margin: 0.75,
+          filename: `proposal-${result.client_name || 'proposal'}.pdf`,
+          image: { type: 'jpeg', quality: 0.98 },
+          html2canvas: { scale: 2 },
+          jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+        };
+
+        await html2pdf().set(opt).from(container).save();
 
         showStatus('PDF generated and downloaded!', 'success');
       } catch (e) {
