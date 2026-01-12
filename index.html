@@ -887,6 +887,9 @@
           <head>
             <title>Proposal - ${clientName}</title>
             <style>
+              @page {
+                margin: 0.5in;
+              }
               body {
                 font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
                 line-height: 1.5;
@@ -897,7 +900,10 @@
                 font-size: 13px;
               }
               @media print {
-                body { padding: 0; }
+                body { 
+                  padding: 0;
+                  margin: 0;
+                }
               }
               table { border-collapse: collapse; width: 100%; margin: 16px 0; font-size: 12px; }
               th, td { border: 1px solid #e0e0e0; padding: 10px 12px; text-align: left; }
@@ -917,11 +923,16 @@
                 font-weight: 500;
               }
               .print-btn:hover { background: #34495e; }
-              @media print { .print-btn { display: none; } }
+              .print-instruction { color: #7f8c8d; font-size: 12px; margin-bottom: 20px; }
+              @media print { 
+                .print-btn { display: none; }
+                .print-instruction { display: none; }
+              }
             </style>
           </head>
           <body>
             <button class="print-btn" onclick="window.print()">Print / Save as PDF</button>
+            <p class="print-instruction" style="margin-bottom: 20px; color: #7f8c8d; font-size: 12px;">💡 In the print dialog, make sure to disable "Headers and footers" for a clean PDF</p>
             ${html}
           </body>
           </html>
