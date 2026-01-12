@@ -746,44 +746,7 @@
       }
     }
 
-    // Simple markdown to HTML converter
-    function markdownToHtml(md) {
-      let html = md
-        // Headers
-        .replace(/^### (.*$)/gm, '<h3 style="color:#333;margin-top:20px;">$1</h3>')
-        .replace(/^## (.*$)/gm, '<h2 style="color:#000;margin-top:30px;border-bottom:1px solid #ddd;padding-bottom:8px;">$1</h2>')
-        .replace(/^# (.*$)/gm, '<h1 style="color:#000;border-bottom:2px solid #000;padding-bottom:10px;">$1</h1>')
-        // Bold
-        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-        // Italic
-        .replace(/\*(.*?)\*/g, '<em style="font-size:0.9em;color:#555;">$1</em>')
-        // Horizontal rule
-        .replace(/^---$/gm, '<hr style="border:none;border-top:1px solid #ddd;margin:30px 0;">')
-        // Unordered lists
-        .replace(/^- (.*$)/gm, '<li style="margin:8px 0;">$1</li>')
-        // Line breaks
-        .replace(/\n\n/g, '</p><p style="margin:16px 0;">')
-        .replace(/\n/g, '<br>');
-
-      // Wrap in paragraphs
-      html = '<p style="margin:16px 0;">' + html + '</p>';
-
-      // Fix lists
-      html = html.replace(/(<li.*?<\/li>)+/g, '<ul style="padding-left:20px;margin:16px 0;">$&</ul>');
-
-      // Tables
-      html = html.replace(/\|(.+)\|/g, (match) => {
-        const cells = match.split('|').filter(c => c.trim());
-        if (cells.some(c => c.includes('---'))) return '';
-        const cellHtml = cells.map(c => `<td style="border:1px solid #ccc;padding:12px;">${c.trim()}</td>`).join('');
-        return `<tr>${cellHtml}</tr>`;
-      });
-      html = html.replace(/(<tr>.*<\/tr>)+/gs, '<table style="border-collapse:collapse;width:100%;margin:20px 0;">$&</table>');
-
-      return html;
-    }
-
-    // Generate PDF
+    // Generate PDF directly from form data (no API needed)
     async function generatePdf() {
       const btn = document.getElementById('generateBtn');
       btn.disabled = true;
@@ -792,68 +755,122 @@
 
       try {
         // Gather all form data
-        const data = {
-          client_name: document.getElementById('client_name').value,
-          project_summary: document.getElementById('project_summary').value,
-          business_name: settings.business_name,
-          business_email: settings.business_email,
-          business_phone: settings.business_phone,
-          deliverables: [],
-          timeline: [],
-          client_needs: [],
-          milestones: []
-        };
+        const clientName = document.getElementById('client_name').value || 'Client';
+        const projectSummary = document.getElementById('project_summary').value || '';
+        const timelineTotal = document.getElementById('timeline-total').textContent;
 
-        // Deliverables
+        const deliverables = [];
         document.querySelectorAll('#deliverables-list .list-item').forEach(item => {
-          data.deliverables.push({
-            name: item.querySelector('.deliverable-name').value,
-            description: item.querySelector('.deliverable-desc').value
-          });
+          const name = item.querySelector('.deliverable-name').value;
+          const desc = item.querySelector('.deliverable-desc').value;
+          if (name) deliverables.push({ name, description: desc });
         });
 
-        // Timeline
+        const timeline = [];
         document.querySelectorAll('#timeline-list .list-item').forEach(item => {
+          const phase = item.querySelector('.phase-name').value;
           const num = item.querySelector('.phase-duration-num').value;
           const unit = item.querySelector('.phase-duration-unit').value;
-          data.timeline.push({
-            phase: item.querySelector('.phase-name').value,
-            duration: `${num} ${unit}`,
-            description: item.querySelector('.phase-desc').value
-          });
+          const desc = item.querySelector('.phase-desc').value;
+          if (phase) timeline.push({ phase, duration: `${num} ${unit}`, description: desc });
         });
 
-        // Add timeline total
-        data.timeline_total = document.getElementById('timeline-total').textContent;
-
-        // Client needs
+        const clientNeeds = [];
         document.querySelectorAll('#client-needs-list .client-need').forEach(input => {
-          if (input.value.trim()) data.client_needs.push(input.value);
+          if (input.value.trim()) clientNeeds.push(input.value);
         });
 
-        // Milestones
+        const milestones = [];
+        let totalInvestment = 0;
         document.querySelectorAll('#milestones-list .list-item').forEach(item => {
-          data.milestones.push({
-            name: item.querySelector('.milestone-name').value,
-            amount: item.querySelector('.milestone-amount').value
-          });
+          const name = item.querySelector('.milestone-name').value;
+          const amount = parseFloat(item.querySelector('.milestone-amount').value) || 0;
+          if (name) milestones.push({ name, amount });
+          totalInvestment += amount;
         });
 
-        const res = await authFetch('/api/generate-pdf', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(data)
+        const date = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+
+        // Build HTML directly
+        let html = `
+          <h1 style="color:#000;border-bottom:2px solid #000;padding-bottom:10px;margin-top:0;">Web Design Proposal</h1>
+          <p><strong>For:</strong> ${clientName}<br>
+          <strong>Date:</strong> ${date}<br>
+          <strong>From:</strong> Wenlaunch Studios</p>
+          <hr style="border:none;border-top:1px solid #ddd;margin:30px 0;">
+
+          <h2 style="color:#000;margin-top:30px;">Project Summary</h2>
+          <p>${projectSummary.replace(/\n/g, '<br>')}</p>
+          <hr style="border:none;border-top:1px solid #ddd;margin:30px 0;">
+
+          <h2 style="color:#000;margin-top:30px;">Deliverables</h2>
+        `;
+
+        deliverables.forEach(d => {
+          html += `<h3 style="color:#333;margin-top:20px;">${d.name}</h3><p>${d.description}</p>`;
         });
 
-        if (!res.ok) {
-          const err = await res.json();
-          throw new Error(err.error || 'PDF generation failed');
-        }
+        html += `
+          <hr style="border:none;border-top:1px solid #ddd;margin:30px 0;">
+          <h2 style="color:#000;margin-top:30px;">Project Timeline</h2>
+          <table style="border-collapse:collapse;width:100%;margin:20px 0;">
+            <tr style="background:#000;color:#fff;">
+              <th style="border:1px solid #ccc;padding:12px;text-align:left;">Phase</th>
+              <th style="border:1px solid #ccc;padding:12px;text-align:left;">Duration</th>
+              <th style="border:1px solid #ccc;padding:12px;text-align:left;">Description</th>
+            </tr>
+        `;
 
-        const result = await res.json();
+        timeline.forEach(t => {
+          html += `<tr><td style="border:1px solid #ccc;padding:12px;">${t.phase}</td><td style="border:1px solid #ccc;padding:12px;">${t.duration}</td><td style="border:1px solid #ccc;padding:12px;">${t.description}</td></tr>`;
+        });
 
-        // Convert markdown to HTML and generate PDF client-side
-        const html = markdownToHtml(result.markdown);
+        html += `
+            <tr style="font-weight:bold;"><td style="border:1px solid #ccc;padding:12px;">Total</td><td style="border:1px solid #ccc;padding:12px;">${timelineTotal}</td><td style="border:1px solid #ccc;padding:12px;"></td></tr>
+          </table>
+          <p style="font-size:0.9em;color:#555;font-style:italic;">Please note: We operate in a creative capacity, and project timelines are dependent on the client's cooperation, timely responses, and clear direction on project requirements.</p>
+          <hr style="border:none;border-top:1px solid #ddd;margin:30px 0;">
+
+          <h2 style="color:#000;margin-top:30px;">What We Need From You</h2>
+          <ul style="padding-left:20px;">
+        `;
+
+        clientNeeds.forEach(need => {
+          html += `<li style="margin:8px 0;">${need}</li>`;
+        });
+
+        html += `
+          </ul>
+          <hr style="border:none;border-top:1px solid #ddd;margin:30px 0;">
+
+          <h2 style="color:#000;margin-top:30px;">Investment</h2>
+          <table style="border-collapse:collapse;width:100%;margin:20px 0;">
+            <tr style="background:#000;color:#fff;">
+              <th style="border:1px solid #ccc;padding:12px;text-align:left;">Milestone</th>
+              <th style="border:1px solid #ccc;padding:12px;text-align:left;">Amount</th>
+            </tr>
+        `;
+
+        milestones.forEach(m => {
+          html += `<tr><td style="border:1px solid #ccc;padding:12px;">${m.name}</td><td style="border:1px solid #ccc;padding:12px;">$${m.amount.toLocaleString()}</td></tr>`;
+        });
+
+        html += `
+          </table>
+          <p style="font-size:1.2em;font-weight:bold;">Total Investment: $${totalInvestment.toLocaleString()}</p>
+          <hr style="border:none;border-top:1px solid #ddd;margin:30px 0;">
+
+          <h2 style="color:#000;margin-top:30px;">Terms & Conditions</h2>
+          <ul style="padding-left:20px;">
+            <li style="margin:8px 0;">All content and assets must be provided by client before design phase begins</li>
+            <li style="margin:8px 0;">Revisions are included within each phase; additional rounds may incur extra fees</li>
+            <li style="margin:8px 0;">Timeline begins upon receipt of deposit and required materials</li>
+            <li style="margin:8px 0;">Final files delivered upon receipt of final payment</li>
+          </ul>
+          <hr style="border:none;border-top:1px solid #ddd;margin:30px 0;">
+          <p><strong>Wenlaunch Studios</strong><br>${settings.business_email || ''}${settings.business_phone ? '<br>' + settings.business_phone : ''}</p>
+        `;
+
         const container = document.createElement('div');
         container.innerHTML = html;
         container.style.padding = '40px';
@@ -866,20 +883,18 @@
         container.style.top = '0';
         container.style.width = '8.5in';
 
-        // Must add to DOM for html2pdf to render
         document.body.appendChild(container);
 
         const opt = {
           margin: 0.75,
-          filename: `proposal-${result.client_name || 'proposal'}.pdf`,
+          filename: `proposal-${clientName.replace(/[^a-zA-Z0-9]/g, '-').toLowerCase()}.pdf`,
           image: { type: 'jpeg', quality: 0.98 },
-          html2canvas: { scale: 2, useCORS: true },
+          html2canvas: { scale: 2, useCORS: true, logging: false },
           jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
         };
 
         await html2pdf().set(opt).from(container).save();
 
-        // Clean up
         document.body.removeChild(container);
 
         showStatus('PDF generated and downloaded!', 'success');
