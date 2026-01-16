@@ -2419,12 +2419,102 @@ ${businessName}`;
       showStatus('Contract opened in new tab - click Print or use Cmd/Ctrl+P to save as PDF', 'success');
     }
 
+    // Contract form auto-save functionality
+    function saveContractFormData() {
+      const contractData = {
+        client_name: document.getElementById('contract_client_name').value,
+        client_email: document.getElementById('contract_client_email').value,
+        client_address: document.getElementById('contract_client_address').value,
+        contract_date: document.getElementById('contract_date').value,
+        project_name: document.getElementById('contract_project_name').value,
+        scope: document.getElementById('contract_scope').value,
+        timeline: document.getElementById('contract_timeline').value,
+        total_fee: document.getElementById('contract_total_fee').value,
+        payment_schedule: document.getElementById('contract_payment_schedule').value,
+        work_sharing: document.getElementById('contract_work_sharing').checked,
+        confidentiality: document.getElementById('contract_confidentiality').checked,
+        additional_terms: document.getElementById('contract_additional_terms').value
+      };
+
+      localStorage.setItem('contractFormData', JSON.stringify(contractData));
+    }
+
+    function loadContractFormData() {
+      try {
+        const saved = localStorage.getItem('contractFormData');
+        if (!saved) {
+          // Set default date if no saved data
+          document.getElementById('contract_date').value = new Date().toISOString().split('T')[0];
+          return;
+        }
+
+        const contractData = JSON.parse(saved);
+
+        // Load all fields
+        document.getElementById('contract_client_name').value = contractData.client_name || '';
+        document.getElementById('contract_client_email').value = contractData.client_email || '';
+        document.getElementById('contract_client_address').value = contractData.client_address || '';
+        document.getElementById('contract_date').value = contractData.contract_date || new Date().toISOString().split('T')[0];
+        document.getElementById('contract_project_name').value = contractData.project_name || '';
+        document.getElementById('contract_scope').value = contractData.scope || '';
+        document.getElementById('contract_timeline').value = contractData.timeline || '';
+        document.getElementById('contract_total_fee').value = contractData.total_fee || '';
+        document.getElementById('contract_payment_schedule').value = contractData.payment_schedule || '';
+        document.getElementById('contract_work_sharing').checked = contractData.work_sharing !== undefined ? contractData.work_sharing : true;
+        document.getElementById('contract_confidentiality').checked = contractData.confidentiality !== undefined ? contractData.confidentiality : true;
+        document.getElementById('contract_additional_terms').value = contractData.additional_terms || '';
+      } catch (e) {
+        console.error('Failed to load contract form data:', e);
+        // Set default date on error
+        document.getElementById('contract_date').value = new Date().toISOString().split('T')[0];
+      }
+    }
+
+    // Auto-save contract form on input changes (debounced)
+    let saveContractTimeout;
+    function debouncedSaveContract() {
+      clearTimeout(saveContractTimeout);
+      saveContractTimeout = setTimeout(saveContractFormData, 500);
+    }
+
+    // Setup auto-save listeners for contract form
+    function setupContractAutoSave() {
+      const contractFields = [
+        'contract_client_name',
+        'contract_client_email',
+        'contract_client_address',
+        'contract_date',
+        'contract_project_name',
+        'contract_scope',
+        'contract_timeline',
+        'contract_total_fee',
+        'contract_payment_schedule',
+        'contract_additional_terms'
+      ];
+
+      contractFields.forEach(id => {
+        const element = document.getElementById(id);
+        if (element) {
+          element.addEventListener('input', debouncedSaveContract);
+          element.addEventListener('change', debouncedSaveContract);
+        }
+      });
+
+      // Checkboxes
+      ['contract_work_sharing', 'contract_confidentiality'].forEach(id => {
+        const element = document.getElementById(id);
+        if (element) {
+          element.addEventListener('change', debouncedSaveContract);
+        }
+      });
+    }
+
     function clearContractForm() {
       if (!confirm('Clear all contract form data?')) return;
       document.getElementById('contract_client_name').value = '';
       document.getElementById('contract_client_email').value = '';
       document.getElementById('contract_client_address').value = '';
-      document.getElementById('contract_date').value = '';
+      document.getElementById('contract_date').value = new Date().toISOString().split('T')[0];
       document.getElementById('contract_project_name').value = '';
       document.getElementById('contract_scope').value = '';
       document.getElementById('contract_timeline').value = '';
@@ -2433,15 +2523,17 @@ ${businessName}`;
       document.getElementById('contract_work_sharing').checked = true;
       document.getElementById('contract_confidentiality').checked = true;
       document.getElementById('contract_additional_terms').value = '';
+      
+      // Clear saved data
+      localStorage.removeItem('contractFormData');
     }
 
     // Initialize
     loadSettings();
-    loadFormData(); // Load saved form data
-    setupAutoSave(); // Setup auto-save listeners
-    
-    // Set default contract date to today
-    document.getElementById('contract_date').value = new Date().toISOString().split('T')[0];
+    loadFormData(); // Load saved proposal form data
+    setupAutoSave(); // Setup proposal auto-save listeners
+    loadContractFormData(); // Load saved contract form data
+    setupContractAutoSave(); // Setup contract auto-save listeners
   </script>
 </body>
 </html>
