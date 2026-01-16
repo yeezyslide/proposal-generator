@@ -845,14 +845,16 @@
           <hr style="border:none;border-top:1px solid #e0e0e0;margin:24px 0;">
 
           <h2 style="color:#1a1a1a;margin-top:28px;margin-bottom:12px;font-size:17px;font-weight:600;letter-spacing:-0.3px;">Project Summary</h2>
-          <p style="font-size:13px;line-height:1.5;color:#2c3e50;">${projectSummary.replace(/\n/g, '<br>')}</p>
+          <p style="font-size:13px;line-height:1.5;color:#2c3e50;white-space:pre-wrap;">${escapeHtml(projectSummary || '').replace(/\n/g, '<br>')}</p>
           <hr style="border:none;border-top:1px solid #e0e0e0;margin:24px 0;">
 
           <h2 style="color:#1a1a1a;margin-top:28px;margin-bottom:12px;font-size:17px;font-weight:600;letter-spacing:-0.3px;">Deliverables</h2>
         `;
 
         deliverables.forEach(d => {
-          html += `<h3 style="color:#34495e;font-size:14px;font-weight:600;margin-top:16px;margin-bottom:8px;">${d.name}</h3><p style="font-size:13px;line-height:1.5;color:#2c3e50;">${d.description}</p>`;
+          // Convert newlines to <br> tags and preserve formatting
+          const formattedDesc = escapeHtml(d.description || '').replace(/\n/g, '<br>');
+          html += `<h3 style="color:#34495e;font-size:14px;font-weight:600;margin-top:16px;margin-bottom:8px;">${escapeHtml(d.name)}</h3><p style="font-size:13px;line-height:1.5;color:#2c3e50;white-space:pre-wrap;">${formattedDesc}</p>`;
         });
 
         html += `
@@ -868,7 +870,8 @@
 
         timeline.forEach((t, i) => {
           const bgColor = i % 2 === 0 ? 'transparent' : '#f8f9fa';
-          html += `<tr style="background:${bgColor};"><td style="border:1px solid #e0e0e0;padding:10px 12px;font-size:12px;">${t.phase}</td><td style="border:1px solid #e0e0e0;padding:10px 12px;font-size:12px;">${t.duration}</td><td style="border:1px solid #e0e0e0;padding:10px 12px;font-size:12px;">${t.description}</td></tr>`;
+          const formattedDesc = escapeHtml(t.description || '').replace(/\n/g, '<br>');
+          html += `<tr style="background:${bgColor};"><td style="border:1px solid #e0e0e0;padding:10px 12px;font-size:12px;">${escapeHtml(t.phase)}</td><td style="border:1px solid #e0e0e0;padding:10px 12px;font-size:12px;">${escapeHtml(t.duration)}</td><td style="border:1px solid #e0e0e0;padding:10px 12px;font-size:12px;white-space:pre-wrap;">${formattedDesc}</td></tr>`;
         });
 
         html += `
