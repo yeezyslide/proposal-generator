@@ -397,6 +397,24 @@
       border-top: 1px solid #e0e0e0;
       margin: 24px 0;
     }
+
+    /* Tab Styles */
+    .tab-btn.active {
+      color: #fff !important;
+      border-bottom-color: #fff !important;
+    }
+
+    .tab-btn:hover {
+      color: #ccc !important;
+    }
+
+    .tab-content {
+      display: block;
+    }
+
+    .tab-content.hidden {
+      display: none;
+    }
   </style>
 </head>
 <body>
@@ -420,7 +438,20 @@
       <button class="settings-btn" onclick="openSettings()">Settings</button>
     </header>
 
+    <!-- Tabs -->
+    <div style="display: flex; gap: 8px; margin-bottom: 20px; border-bottom: 1px solid #222;">
+      <button class="tab-btn active" id="proposal-tab" onclick="switchTab('proposal')" style="background: transparent; border: none; padding: 12px 20px; color: #999; cursor: pointer; border-bottom: 2px solid transparent; font-size: 14px; font-weight: 500; transition: all 0.2s;">
+        Proposal
+      </button>
+      <button class="tab-btn" id="contract-tab" onclick="switchTab('contract')" style="background: transparent; border: none; padding: 12px 20px; color: #999; cursor: pointer; border-bottom: 2px solid transparent; font-size: 14px; font-weight: 500; transition: all 0.2s;">
+        Contract Agreement
+      </button>
+    </div>
+
     <div id="status" class="status"></div>
+
+    <!-- Proposal Tab Content -->
+    <div id="proposal-content" class="tab-content">
 
     <!-- Client Info -->
     <div class="card">
@@ -558,6 +589,80 @@
         </button>
       </div>
       <div id="email-content" style="background: #f9f9f9; padding: 20px; border-radius: 8px; white-space: pre-wrap; font-family: inherit; line-height: 1.6;"></div>
+    </div>
+    </div>
+
+    <!-- Contract Agreement Tab Content -->
+    <div id="contract-content" class="tab-content" style="display: none;">
+      <!-- Contract Client Info -->
+      <div class="card">
+        <h2>Contract Information</h2>
+        <div class="row">
+          <div>
+            <label>Client Name / Company</label>
+            <input type="text" id="contract_client_name" placeholder="John Doe / Acme Corp">
+          </div>
+          <div>
+            <label>Client Email</label>
+            <input type="email" id="contract_client_email" placeholder="client@example.com">
+          </div>
+        </div>
+        <div class="row">
+          <div>
+            <label>Client Address</label>
+            <input type="text" id="contract_client_address" placeholder="123 Main St, City, State ZIP">
+          </div>
+          <div>
+            <label>Agreement Date</label>
+            <input type="date" id="contract_date" value="">
+          </div>
+        </div>
+      </div>
+
+      <!-- Project Details -->
+      <div class="card">
+        <h2>Project Details</h2>
+        <label>Project Name / Description</label>
+        <input type="text" id="contract_project_name" placeholder="Website Redesign">
+        <label>Project Scope / Deliverables</label>
+        <textarea id="contract_scope" style="min-height: 120px;" placeholder="Detailed description of work to be performed..."></textarea>
+        <label>Project Timeline / Completion Date</label>
+        <input type="text" id="contract_timeline" placeholder="e.g., 6 weeks from start date, or specific date">
+      </div>
+
+      <!-- Payment Terms -->
+      <div class="card">
+        <h2>Payment Terms</h2>
+        <label>Total Project Fee</label>
+        <input type="number" id="contract_total_fee" placeholder="5000" min="0" step="0.01">
+        <label>Payment Schedule (e.g., "50% upon signing, 50% upon completion")</label>
+        <textarea id="contract_payment_schedule" style="min-height: 80px;" placeholder="Describe payment milestones and amounts..."></textarea>
+      </div>
+
+      <!-- Additional Terms -->
+      <div class="card">
+        <h2>Additional Terms</h2>
+        <label>
+          <input type="checkbox" id="contract_work_sharing" checked style="width: auto; margin-right: 8px;">
+          Client agrees to work sharing on social media (with attribution)
+        </label>
+        <label>
+          <input type="checkbox" id="contract_confidentiality" checked style="width: auto; margin-right: 8px;">
+          Maintain strict confidentiality of client information
+        </label>
+        <label>Additional Terms or Modifications (optional)</label>
+        <textarea id="contract_additional_terms" style="min-height: 100px;" placeholder="Any additional terms or modifications to the standard agreement..."></textarea>
+      </div>
+
+      <!-- Actions -->
+      <div class="actions">
+        <button class="btn btn-primary" onclick="generateContract()" id="generateContractBtn">
+          Generate Contract
+        </button>
+        <button class="btn btn-secondary" onclick="clearContractForm()">
+          Clear Form
+        </button>
+      </div>
     </div>
   </div>
   </div>
@@ -1719,10 +1824,289 @@ ${businessName}`;
       });
     }
 
+    // Tab Switching
+    function switchTab(tab) {
+      const proposalTab = document.getElementById('proposal-tab');
+      const contractTab = document.getElementById('contract-tab');
+      const proposalContent = document.getElementById('proposal-content');
+      const contractContent = document.getElementById('contract-content');
+
+      if (tab === 'proposal') {
+        proposalTab.classList.add('active');
+        contractTab.classList.remove('active');
+        proposalContent.style.display = 'block';
+        contractContent.style.display = 'none';
+      } else {
+        contractTab.classList.add('active');
+        proposalTab.classList.remove('active');
+        contractContent.style.display = 'block';
+        proposalContent.style.display = 'none';
+      }
+    }
+
+    // Contract Agreement Functions
+    function generateContract() {
+      const clientName = document.getElementById('contract_client_name').value || '[Client Name]';
+      const clientEmail = document.getElementById('contract_client_email').value || '[Client Email]';
+      const clientAddress = document.getElementById('contract_client_address').value || '[Client Address]';
+      const agreementDate = document.getElementById('contract_date').value || new Date().toISOString().split('T')[0];
+      const projectName = document.getElementById('contract_project_name').value || '[Project Name]';
+      const scope = document.getElementById('contract_scope').value || '[Project Scope]';
+      const timeline = document.getElementById('contract_timeline').value || '[Project Timeline]';
+      const totalFee = parseFloat(document.getElementById('contract_total_fee').value) || 0;
+      const paymentSchedule = document.getElementById('contract_payment_schedule').value || '[Payment Schedule]';
+      const workSharing = document.getElementById('contract_work_sharing').checked;
+      const confidentiality = document.getElementById('contract_confidentiality').checked;
+      const additionalTerms = document.getElementById('contract_additional_terms').value || '';
+
+      const formattedDate = new Date(agreementDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+      const formattedFee = totalFee.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+
+      let html = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Independent Contractor Agreement - ${clientName}</title>
+          <style>
+            @page {
+              margin: 0.5in;
+            }
+            body {
+              font-family: 'Times New Roman', serif;
+              line-height: 1.6;
+              color: #000;
+              padding: 40px;
+              max-width: 8.5in;
+              margin: 0 auto;
+              font-size: 12pt;
+            }
+            @media print {
+              body { 
+                padding: 0;
+                margin: 0;
+              }
+            }
+            h1 {
+              font-size: 18pt;
+              font-weight: bold;
+              text-align: center;
+              margin-bottom: 20px;
+            }
+            h2 {
+              font-size: 14pt;
+              font-weight: bold;
+              margin-top: 20px;
+              margin-bottom: 10px;
+            }
+            p {
+              margin: 10px 0;
+              text-align: justify;
+            }
+            .signature-section {
+              margin-top: 40px;
+              page-break-inside: avoid;
+            }
+            .signature-line {
+              margin-top: 50px;
+              border-top: 1px solid #000;
+              padding-top: 5px;
+              width: 300px;
+            }
+            .print-btn {
+              background: #2c3e50; color: #fff; padding: 12px 24px; border: none;
+              border-radius: 6px; cursor: pointer; font-size: 14px; margin-bottom: 20px;
+              font-weight: 500;
+            }
+            .print-btn:hover { background: #34495e; }
+            .print-instruction { color: #7f8c8d; font-size: 12px; margin-bottom: 20px; }
+            @media print { 
+              .print-btn { display: none; }
+              .print-instruction { display: none; }
+            }
+          </style>
+        </head>
+        <body>
+          <button class="print-btn" onclick="window.print()">Print / Save as PDF</button>
+          <p class="print-instruction">💡 In the print dialog, make sure to disable "Headers and footers" for a clean PDF</p>
+
+          <h1>INDEPENDENT CONTRACTOR AGREEMENT</h1>
+
+          <p>This Independent Contractor Agreement ("Agreement") is entered into on ${formattedDate} ("Effective Date") by and between:</p>
+
+          <p><strong>Contractor:</strong><br>
+          MMP Capital LLC<br>
+          A Limited Liability Company organized under the laws of the Commonwealth of Virginia<br>
+          Business License: Virginia, USA<br>
+          (hereinafter referred to as "Contractor")</p>
+
+          <p><strong>Client:</strong><br>
+          ${escapeHtml(clientName)}<br>
+          ${escapeHtml(clientAddress)}<br>
+          Email: ${escapeHtml(clientEmail)}<br>
+          (hereinafter referred to as "Client")</p>
+
+          <p>WHEREAS, Contractor is engaged in the business of providing web design and development services; and</p>
+
+          <p>WHEREAS, Client desires to engage Contractor to perform certain services as described herein;</p>
+
+          <p>NOW, THEREFORE, in consideration of the mutual covenants contained herein, the parties agree as follows:</p>
+
+          <h2>1. SCOPE OF WORK</h2>
+          <p><strong>1.1 Project Description:</strong> ${escapeHtml(projectName)}</p>
+          <p><strong>1.2 Deliverables:</strong> Contractor shall provide the following services and deliverables:</p>
+          <p style="margin-left: 20px;">${escapeHtml(scope).replace(/\n/g, '<br>')}</p>
+          <p><strong>1.3 Timeline:</strong> ${escapeHtml(timeline)}</p>
+
+          <h2>2. COMPENSATION</h2>
+          <p><strong>2.1 Total Fee:</strong> Client agrees to pay Contractor a total fee of ${formattedFee} for the services described herein.</p>
+          <p><strong>2.2 Payment Schedule:</strong> Payment shall be made according to the following schedule:</p>
+          <p style="margin-left: 20px;">${escapeHtml(paymentSchedule).replace(/\n/g, '<br>')}</p>
+          <p><strong>2.3 Payment Method:</strong> Payments shall be made via [Payment Method] to an account designated by Contractor.</p>
+          <p><strong>2.4 Late Payment:</strong> Any payment not received within ten (10) business days of the due date shall be subject to a late fee of 5% per month or the maximum allowed by law, whichever is less.</p>
+          <p><strong>2.5 Non-Refundable Payments:</strong> All payments made to Contractor are non-refundable based on the phase of work completed. Once a phase has been initiated or completed, payment for that phase is not subject to refund, regardless of whether the project is terminated. Client acknowledges that Contractor incurs costs and allocates resources upon initiation of each phase, and as such, phase payments represent compensation for work performed and resources allocated up to the point of termination, if applicable.</p>
+
+          <h2>3. INDEPENDENT CONTRACTOR STATUS</h2>
+          <p>Contractor is an independent contractor, and nothing in this Agreement shall be construed to create an employer-employee relationship, partnership, joint venture, or any other relationship other than that of independent contractor. Contractor shall not be entitled to any employee benefits, and Contractor is responsible for all taxes, insurance, and other obligations related to Contractor's business.</p>
+
+          <h2>4. INTELLECTUAL PROPERTY</h2>
+          <p><strong>4.1 Ownership:</strong> Upon full payment of all fees due under this Agreement, Contractor hereby assigns to Client all right, title, and interest in and to the work product created under this Agreement, including but not limited to designs, code, graphics, and other deliverables, to the extent such work product is original and does not incorporate pre-existing materials owned by Contractor or third parties.</p>
+          <p><strong>4.2 Contractor's Portfolio Rights:</strong> ${workSharing ? 'Contractor retains the right to use, display, and publish the work product in Contractor\'s portfolio, website, social media, marketing materials, and other promotional materials, with proper attribution to Client. Client grants Contractor a non-exclusive, worldwide, perpetual license to use the work product for such purposes. Contractor agrees to maintain the confidentiality of any proprietary or sensitive business information disclosed by Client, as outlined in Section 5.' : 'Upon full payment, all rights to the work product are assigned to Client as described in Section 4.1. Contractor may not use the work product in its portfolio or marketing materials without Client\'s written consent.'}</p>
+          <p><strong>4.3 Third-Party Materials:</strong> Any third-party materials, including fonts, images, plugins, or other assets, shall be subject to their respective licenses, and Client shall be responsible for obtaining any necessary licenses or permissions.</p>
+
+          <h2>5. CONFIDENTIALITY AND PRIVACY</h2>
+          <p>${confidentiality ? 'Contractor acknowledges that during the course of performing services under this Agreement, Contractor may have access to confidential, proprietary, or private information belonging to Client, including but not limited to business strategies, financial information, customer data, trade secrets, and other sensitive information ("Confidential Information"). Contractor agrees to:' : 'Contractor shall maintain strict confidentiality of all Client information.'}</p>
+          <ul style="margin-left: 20px;">
+            ${confidentiality ? `
+            <li>Hold all Confidential Information in strict confidence and not disclose it to any third party without Client's prior written consent;</li>
+            <li>Use Confidential Information solely for the purpose of performing services under this Agreement;</li>
+            <li>Take reasonable measures to protect the confidentiality of such information;</li>
+            <li>Return or destroy all Confidential Information upon termination of this Agreement or upon Client's request;</li>
+            <li>Not use Confidential Information for Contractor's own benefit or for the benefit of any third party.</li>
+            ` : `
+            <li>Not disclose any Client information to third parties without written consent;</li>
+            <li>Use Client information solely for the purpose of performing services under this Agreement;</li>
+            <li>Return or destroy all confidential information upon request.</li>
+            `}
+          </ul>
+          <p>This confidentiality obligation shall survive termination of this Agreement and shall continue indefinitely with respect to trade secrets and for a period of three (3) years with respect to other Confidential Information.</p>
+
+          <h2>6. CLIENT OBLIGATIONS</h2>
+          <p>Client agrees to:</p>
+          <ul style="margin-left: 20px;">
+            <li>Provide all necessary information, content, materials, and access required for Contractor to perform the services;</li>
+            <li>Respond to Contractor's requests for feedback, approvals, or information in a timely manner;</li>
+            <li>Make payments according to the payment schedule outlined in Section 2.2;</li>
+            <li>Obtain any necessary licenses, permissions, or rights for materials provided to Contractor;</li>
+            <li>Comply with all applicable laws and regulations in relation to the project.</li>
+          </ul>
+
+          <h2>7. REVISIONS AND CHANGES</h2>
+          <p><strong>7.1 Revisions:</strong> Contractor shall provide [Number] rounds of revisions per phase, as outlined in the scope of work. Additional revisions may be requested but shall be subject to additional fees at Contractor's then-current hourly rate.</p>
+          <p><strong>7.2 Change Orders:</strong> Any material changes to the scope of work, timeline, or deliverables shall require a written change order signed by both parties. Change orders may result in additional fees and extended timelines.</p>
+
+          <h2>8. WARRANTIES AND REPRESENTATIONS</h2>
+          <p>Contractor warrants that:</p>
+          <ul style="margin-left: 20px;">
+            <li>The work product will be original or properly licensed;</li>
+            <li>The work product will not infringe upon the intellectual property rights of any third party;</li>
+            <li>Contractor has the right and authority to enter into this Agreement and perform the services described herein.</li>
+          </ul>
+          <p>EXCEPT AS EXPRESSLY PROVIDED HEREIN, CONTRACTOR MAKES NO OTHER WARRANTIES, EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION WARRANTIES OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.</p>
+
+          <h2>9. LIMITATION OF LIABILITY</h2>
+          <p>IN NO EVENT SHALL CONTRACTOR BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES, INCLUDING BUT NOT LIMITED TO LOSS OF PROFITS, REVENUE, DATA, OR USE, ARISING OUT OF OR RELATED TO THIS AGREEMENT, REGARDLESS OF THE THEORY OF LIABILITY. CONTRACTOR'S TOTAL LIABILITY UNDER THIS AGREEMENT SHALL NOT EXCEED THE TOTAL AMOUNT PAID BY CLIENT TO CONTRACTOR UNDER THIS AGREEMENT.</p>
+
+          <h2>10. TERMINATION</h2>
+          <p><strong>10.1 Termination for Convenience:</strong> Either party may terminate this Agreement at any time upon thirty (30) days' written notice to the other party. Upon termination, Client shall pay Contractor for all work completed up to the date of termination, calculated based on the payment schedule and phase completion.</p>
+          <p><strong>10.2 Termination for Cause:</strong> Either party may terminate this Agreement immediately upon written notice if the other party breaches any material term of this Agreement and fails to cure such breach within ten (10) days of receiving written notice of the breach.</p>
+          <p><strong>10.3 Effect of Termination:</strong> Upon termination, Contractor shall deliver to Client all work product completed up to the date of termination, and Client shall pay all fees owed to Contractor for work performed up to the date of termination. Sections 4, 5, 8, 9, and 11 shall survive termination.</p>
+
+          <h2>11. DISPUTE RESOLUTION</h2>
+          <p><strong>11.1 Governing Law:</strong> This Agreement shall be governed by and construed in accordance with the laws of the Commonwealth of Virginia, without regard to its conflict of law principles.</p>
+          <p><strong>11.2 Jurisdiction:</strong> Any disputes arising out of or related to this Agreement shall be subject to the exclusive jurisdiction of the state and federal courts located in Virginia.</p>
+          <p><strong>11.3 Mediation:</strong> Before initiating any legal proceedings, the parties agree to attempt to resolve any disputes through good faith negotiation and, if necessary, mediation with a mutually agreed mediator.</p>
+
+          <h2>12. GENERAL PROVISIONS</h2>
+          <p><strong>12.1 Entire Agreement:</strong> This Agreement constitutes the entire agreement between the parties and supersedes all prior agreements, understandings, or communications relating to the subject matter hereof.</p>
+          <p><strong>12.2 Modifications:</strong> This Agreement may only be modified in writing and signed by both parties.</p>
+          <p><strong>12.3 Severability:</strong> If any provision of this Agreement is found to be invalid or unenforceable, the remaining provisions shall continue in full force and effect.</p>
+          <p><strong>12.4 Waiver:</strong> The failure of either party to enforce any provision of this Agreement shall not constitute a waiver of such provision or any other provision.</p>
+          <p><strong>12.5 Notices:</strong> All notices required under this Agreement shall be in writing and delivered via email or certified mail to the addresses specified at the beginning of this Agreement.</p>
+          <p><strong>12.6 Assignment:</strong> Neither party may assign this Agreement without the prior written consent of the other party, except that Contractor may assign this Agreement to an affiliate or successor entity.</p>
+          <p><strong>12.7 Force Majeure:</strong> Neither party shall be liable for any failure or delay in performance due to circumstances beyond its reasonable control, including but not limited to acts of God, natural disasters, war, terrorism, or government actions.</p>
+          ${additionalTerms ? `
+          <h2>13. ADDITIONAL TERMS</h2>
+          <p>${escapeHtml(additionalTerms).replace(/\n/g, '<br>')}</p>
+          ` : ''}
+
+          <div class="signature-section">
+            <p>IN WITNESS WHEREOF, the parties have executed this Agreement as of the date first written above.</p>
+
+            <div style="margin-top: 40px; display: flex; justify-content: space-between;">
+              <div>
+                <div class="signature-line">
+                  <strong>CONTRACTOR:</strong><br>
+                  MMP Capital LLC<br><br>
+                  ___________________________<br>
+                  Signature<br><br>
+                  ___________________________<br>
+                  Print Name<br><br>
+                  ___________________________<br>
+                  Date
+                </div>
+              </div>
+
+              <div>
+                <div class="signature-line">
+                  <strong>CLIENT:</strong><br>
+                  ${escapeHtml(clientName)}<br><br>
+                  ___________________________<br>
+                  Signature<br><br>
+                  ___________________________<br>
+                  Print Name<br><br>
+                  ___________________________<br>
+                  Date
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <p style="margin-top: 40px; font-size: 10pt; color: #666; text-align: center;">
+            <em>This is a legal document. Please review carefully and consult with an attorney if you have any questions.</em>
+          </p>
+        </body>
+        </html>
+      `;
+
+      const printWindow = window.open('', '_blank');
+      printWindow.document.write(html);
+      printWindow.document.close();
+      showStatus('Contract opened in new tab - click Print or use Cmd/Ctrl+P to save as PDF', 'success');
+    }
+
+    function clearContractForm() {
+      if (!confirm('Clear all contract form data?')) return;
+      document.getElementById('contract_client_name').value = '';
+      document.getElementById('contract_client_email').value = '';
+      document.getElementById('contract_client_address').value = '';
+      document.getElementById('contract_date').value = '';
+      document.getElementById('contract_project_name').value = '';
+      document.getElementById('contract_scope').value = '';
+      document.getElementById('contract_timeline').value = '';
+      document.getElementById('contract_total_fee').value = '';
+      document.getElementById('contract_payment_schedule').value = '';
+      document.getElementById('contract_work_sharing').checked = true;
+      document.getElementById('contract_confidentiality').checked = true;
+      document.getElementById('contract_additional_terms').value = '';
+    }
+
     // Initialize
     loadSettings();
     loadFormData(); // Load saved form data
     setupAutoSave(); // Setup auto-save listeners
+    
+    // Set default contract date to today
+    document.getElementById('contract_date').value = new Date().toISOString().split('T')[0];
   </script>
 </body>
 </html>
