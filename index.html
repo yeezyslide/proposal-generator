@@ -808,6 +808,33 @@
         </div>
       </div>
 
+      <!-- Bill From Information -->
+      <div class="card">
+        <h2>Bill From</h2>
+        <div class="row">
+          <div class="col">
+            <label>Business Name / LLC</label>
+            <input type="text" id="invoice_bill_from_name" placeholder="Leave empty to use settings default">
+          </div>
+        </div>
+        <div class="row">
+          <div class="col">
+            <label>Email</label>
+            <input type="email" id="invoice_bill_from_email" placeholder="Leave empty to use settings default">
+          </div>
+          <div class="col">
+            <label>Phone</label>
+            <input type="text" id="invoice_bill_from_phone" placeholder="Leave empty to use settings default">
+          </div>
+        </div>
+        <div class="row">
+          <div class="col">
+            <label>Address (Optional)</label>
+            <textarea id="invoice_bill_from_address" rows="2" placeholder="Street Address, City, State ZIP (optional)"></textarea>
+          </div>
+        </div>
+      </div>
+
       <!-- Client Information -->
       <div class="card">
         <h2>Bill To</h2>
@@ -2709,10 +2736,11 @@ ${businessName}`;
       const total = parseFloat(document.getElementById('invoice_total').textContent) || 0;
       const taxRate = parseFloat(document.getElementById('invoice_tax_rate').value) || 0;
 
-      // Get business info from settings
-      const businessName = settings.business_name || 'Wenlaunch Studios';
-      const businessEmail = settings.business_email || 'mason@wenlaunch.io';
-      const businessPhone = settings.business_phone || '';
+      // Get Bill From info (use form fields if filled, otherwise fall back to settings)
+      const billFromName = document.getElementById('invoice_bill_from_name').value || settings.business_name || 'Wenlaunch Studios';
+      const billFromEmail = document.getElementById('invoice_bill_from_email').value || settings.business_email || 'mason@wenlaunch.io';
+      const billFromPhone = document.getElementById('invoice_bill_from_phone').value || settings.business_phone || '';
+      const billFromAddress = document.getElementById('invoice_bill_from_address').value || '';
       const logoBase64 = settings.logo_base64 || '';
 
       // Build line items HTML
@@ -2870,9 +2898,10 @@ ${businessName}`;
           <div class="info-grid">
             <div class="info-section">
               <h3>Bill From</h3>
-              <p><strong>${businessName}</strong></p>
-              ${businessEmail ? `<p>${businessEmail}</p>` : ''}
-              ${businessPhone ? `<p>${businessPhone}</p>` : ''}
+              <p><strong>${billFromName}</strong></p>
+              ${billFromEmail ? `<p>${billFromEmail}</p>` : ''}
+              ${billFromPhone ? `<p>${billFromPhone}</p>` : ''}
+              ${billFromAddress ? `<p style="white-space: pre-line; margin-top: 8px;">${billFromAddress}</p>` : ''}
             </div>
             <div class="info-section">
               <h3>Bill To</h3>
@@ -2955,6 +2984,10 @@ ${businessName}`;
         invoice_number: document.getElementById('invoice_number').value,
         invoice_date: document.getElementById('invoice_date').value,
         invoice_due_date: document.getElementById('invoice_due_date').value,
+        bill_from_name: document.getElementById('invoice_bill_from_name').value,
+        bill_from_email: document.getElementById('invoice_bill_from_email').value,
+        bill_from_phone: document.getElementById('invoice_bill_from_phone').value,
+        bill_from_address: document.getElementById('invoice_bill_from_address').value,
         client_name: document.getElementById('invoice_client_name').value,
         client_email: document.getElementById('invoice_client_email').value,
         client_address: document.getElementById('invoice_client_address').value,
@@ -2984,6 +3017,10 @@ ${businessName}`;
         document.getElementById('invoice_number').value = invoiceData.invoice_number || '';
         document.getElementById('invoice_date').value = invoiceData.invoice_date || new Date().toISOString().split('T')[0];
         document.getElementById('invoice_due_date').value = invoiceData.invoice_due_date || '';
+        document.getElementById('invoice_bill_from_name').value = invoiceData.bill_from_name || '';
+        document.getElementById('invoice_bill_from_email').value = invoiceData.bill_from_email || '';
+        document.getElementById('invoice_bill_from_phone').value = invoiceData.bill_from_phone || '';
+        document.getElementById('invoice_bill_from_address').value = invoiceData.bill_from_address || '';
         document.getElementById('invoice_client_name').value = invoiceData.client_name || '';
         document.getElementById('invoice_client_email').value = invoiceData.client_email || '';
         document.getElementById('invoice_client_address').value = invoiceData.client_address || '';
@@ -3030,6 +3067,10 @@ ${businessName}`;
         'invoice_number',
         'invoice_date',
         'invoice_due_date',
+        'invoice_bill_from_name',
+        'invoice_bill_from_email',
+        'invoice_bill_from_phone',
+        'invoice_bill_from_address',
         'invoice_client_name',
         'invoice_client_email',
         'invoice_client_address',
@@ -3052,6 +3093,10 @@ ${businessName}`;
       document.getElementById('invoice_number').value = '';
       document.getElementById('invoice_date').value = new Date().toISOString().split('T')[0];
       document.getElementById('invoice_due_date').value = '';
+      document.getElementById('invoice_bill_from_name').value = '';
+      document.getElementById('invoice_bill_from_email').value = '';
+      document.getElementById('invoice_bill_from_phone').value = '';
+      document.getElementById('invoice_bill_from_address').value = '';
       document.getElementById('invoice_client_name').value = '';
       document.getElementById('invoice_client_email').value = '';
       document.getElementById('invoice_client_address').value = '';
