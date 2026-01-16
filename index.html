@@ -398,6 +398,76 @@
       margin: 24px 0;
     }
 
+    /* Contract Editor Styles */
+    #contract-editor-content:focus {
+      outline: 2px solid #fff;
+      outline-offset: -2px;
+    }
+
+    #contract-editor-content h1 {
+      font-size: 18pt;
+      font-weight: bold;
+      text-align: center;
+      margin-bottom: 20px;
+      color: #000;
+    }
+
+    #contract-editor-content h2 {
+      font-size: 14pt;
+      font-weight: bold;
+      margin-top: 20px;
+      margin-bottom: 10px;
+      color: #000;
+    }
+
+    #contract-editor-content h3 {
+      font-size: 12pt;
+      font-weight: bold;
+      margin-top: 15px;
+      margin-bottom: 8px;
+      color: #000;
+    }
+
+    #contract-editor-content p {
+      margin: 10px 0;
+      text-align: justify;
+      color: #000;
+    }
+
+    #contract-editor-content ul, #contract-editor-content ol {
+      margin-left: 20px;
+      margin: 10px 0;
+      padding-left: 20px;
+    }
+
+    #contract-editor-content li {
+      margin: 6px 0;
+    }
+
+    #contract-editor-content table {
+      border-collapse: collapse;
+      width: 100%;
+      margin: 15px 0;
+    }
+
+    #contract-editor-content th, #contract-editor-content td {
+      border: 1px solid #000;
+      padding: 8px;
+      text-align: left;
+    }
+
+    #contract-editor-content th {
+      background: #f0f0f0;
+      font-weight: bold;
+    }
+
+    #contract-editor-content .signature-line {
+      margin-top: 50px;
+      border-top: 1px solid #000;
+      padding-top: 5px;
+      width: 300px;
+    }
+
     /* Tab Styles */
     .tab-btn.active {
       color: #fff !important;
@@ -656,12 +726,59 @@
 
       <!-- Actions -->
       <div class="actions">
-        <button class="btn btn-primary" onclick="generateContract()" id="generateContractBtn">
+        <button class="btn btn-primary" onclick="showContractEditor()" id="previewContractBtn">
+          Preview & Edit
+        </button>
+        <button class="btn btn-primary" onclick="generateContract()" id="generateContractBtn" style="display: none;">
           Generate Contract
         </button>
         <button class="btn btn-secondary" onclick="clearContractForm()">
           Clear Form
         </button>
+      </div>
+
+      <!-- Contract Visual Editor Preview -->
+      <div class="card" id="contract-editor-card" style="display: none;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+          <h2 style="margin: 0;">Preview & Edit Contract Agreement</h2>
+          <div style="display: flex; gap: 8px;">
+            <button class="btn btn-secondary" onclick="hideContractEditor()" style="padding: 8px 16px;">
+              Cancel
+            </button>
+            <button class="btn btn-primary" onclick="generateContractFromEditor()" style="padding: 8px 16px;">
+              Generate Contract
+            </button>
+          </div>
+        </div>
+        
+        <!-- Formatting Toolbar -->
+        <div style="background: #1a1a1a; border: 1px solid #333; border-radius: 6px; padding: 8px; margin-bottom: 12px; display: flex; gap: 8px; flex-wrap: wrap;">
+          <button class="editor-btn" onclick="formatContractText('bold')" title="Bold"><strong>B</strong></button>
+          <button class="editor-btn" onclick="formatContractText('italic')" title="Italic"><em>I</em></button>
+          <button class="editor-btn" onclick="formatContractText('underline')" title="Underline"><u>U</u></button>
+          <div style="width: 1px; background: #333; margin: 0 4px;"></div>
+          <button class="editor-btn" onclick="formatContractText('insertUnorderedList')" title="Bullet List">• List</button>
+          <button class="editor-btn" onclick="formatContractText('insertOrderedList')" title="Numbered List">1. List</button>
+          <div style="width: 1px; background: #333; margin: 0 4px;"></div>
+          <button class="editor-btn" onclick="formatContractText('formatBlock', 'h1')" title="Heading 1">H1</button>
+          <button class="editor-btn" onclick="formatContractText('formatBlock', 'h2')" title="Heading 2">H2</button>
+          <button class="editor-btn" onclick="formatContractText('formatBlock', 'p')" title="Paragraph">P</button>
+        </div>
+        
+        <!-- Editable Contract Content Area -->
+        <div id="contract-editor-content" contenteditable="true" style="
+          background: #fff;
+          color: #000;
+          padding: 40px;
+          border: 1px solid #333;
+          border-radius: 6px;
+          min-height: 800px;
+          font-family: 'Times New Roman', Times, serif;
+          font-size: 12pt;
+          line-height: 1.6;
+          overflow-y: auto;
+          max-height: 85vh;
+        "></div>
       </div>
     </div>
   </div>
@@ -1845,24 +1962,57 @@ ${businessName}`;
     }
 
     // Contract Agreement Functions
-    function generateContract() {
+    function formatContractText(command, value = null) {
+      document.execCommand(command, false, value);
+      document.getElementById('contract-editor-content').focus();
+    }
+
+    function showContractEditor() {
+      const editorCard = document.getElementById('contract-editor-card');
+      const previewBtn = document.getElementById('previewContractBtn');
+      const generateBtn = document.getElementById('generateContractBtn');
+      
+      // Generate contract HTML from form data
+      const html = generateContractHtml();
+      
+      // Populate editor
+      document.getElementById('contract-editor-content').innerHTML = html;
+      
+      // Show editor, hide preview button, show generate button
+      editorCard.style.display = 'block';
+      previewBtn.style.display = 'none';
+      generateBtn.style.display = 'inline-block';
+      
+      // Scroll to editor
+      editorCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function hideContractEditor() {
+      const editorCard = document.getElementById('contract-editor-card');
+      const previewBtn = document.getElementById('previewContractBtn');
+      const generateBtn = document.getElementById('generateContractBtn');
+      
+      editorCard.style.display = 'none';
+      previewBtn.style.display = 'inline-block';
+      generateBtn.style.display = 'none';
+    }
+
+    // Extract contract body content generation to reusable function
+    // This calls generateContract with returnBodyOnly=true to get just the body content
+    function generateContractHtml() {
+      return generateContract(true);
+    }
+
+    // Generate PDF from edited contract content
+    function generateContractFromEditor() {
+      const editorContent = document.getElementById('contract-editor-content').innerHTML;
       const clientName = document.getElementById('contract_client_name').value || '[Client Name]';
-      const clientEmail = document.getElementById('contract_client_email').value || '[Client Email]';
-      const clientAddress = document.getElementById('contract_client_address').value || '[Client Address]';
+      const proposalName = document.getElementById('contract_project_name').value || 'Contract Agreement';
       const agreementDate = document.getElementById('contract_date').value || new Date().toISOString().split('T')[0];
-      const projectName = document.getElementById('contract_project_name').value || '[Project Name]';
-      const scope = document.getElementById('contract_scope').value || '[Project Scope]';
-      const timeline = document.getElementById('contract_timeline').value || '[Project Timeline]';
-      const totalFee = parseFloat(document.getElementById('contract_total_fee').value) || 0;
-      const paymentSchedule = document.getElementById('contract_payment_schedule').value || '[Payment Schedule]';
-      const workSharing = document.getElementById('contract_work_sharing').checked;
-      const confidentiality = document.getElementById('contract_confidentiality').checked;
-      const additionalTerms = document.getElementById('contract_additional_terms').value || '';
 
-      const formattedDate = new Date(agreementDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-      const formattedFee = totalFee.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
-
-      let html = `
+      // Open in new window for printing with legal document formatting
+      const printWindow = window.open('', '_blank');
+      printWindow.document.write(`
         <!DOCTYPE html>
         <html>
         <head>
@@ -1872,7 +2022,7 @@ ${businessName}`;
               margin: 0.5in;
             }
             body {
-              font-family: 'Times New Roman', serif;
+              font-family: 'Times New Roman', Times, serif;
               line-height: 1.6;
               color: #000;
               padding: 40px;
@@ -1928,7 +2078,33 @@ ${businessName}`;
         <body>
           <button class="print-btn" onclick="window.print()">Print / Save as PDF</button>
           <p class="print-instruction">💡 In the print dialog, make sure to disable "Headers and footers" for a clean PDF</p>
+          ${editorContent}
+        </body>
+        </html>
+      `);
+      printWindow.document.close();
+      showStatus('Contract opened in new tab - click Print or use Cmd/Ctrl+P to save as PDF', 'success');
+    }
 
+    function generateContract(returnBodyOnly = false) {
+      const clientName = document.getElementById('contract_client_name').value || '[Client Name]';
+      const clientEmail = document.getElementById('contract_client_email').value || '[Client Email]';
+      const clientAddress = document.getElementById('contract_client_address').value || '[Client Address]';
+      const agreementDate = document.getElementById('contract_date').value || new Date().toISOString().split('T')[0];
+      const projectName = document.getElementById('contract_project_name').value || '[Project Name]';
+      const scope = document.getElementById('contract_scope').value || '[Project Scope]';
+      const timeline = document.getElementById('contract_timeline').value || '[Project Timeline]';
+      const totalFee = parseFloat(document.getElementById('contract_total_fee').value) || 0;
+      const paymentSchedule = document.getElementById('contract_payment_schedule').value || '[Payment Schedule]';
+      const workSharing = document.getElementById('contract_work_sharing').checked;
+      const confidentiality = document.getElementById('contract_confidentiality').checked;
+      const additionalTerms = document.getElementById('contract_additional_terms').value || '';
+
+      const formattedDate = new Date(agreementDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+      const formattedFee = totalFee.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+
+      // Build the body content first (will be used in both editor and PDF)
+      const bodyContent = `
           <h1>INDEPENDENT CONTRACTOR AGREEMENT</h1>
 
           <p>This Independent Contractor Agreement ("Agreement") is entered into on ${formattedDate} ("Effective Date") by and between:</p>
@@ -2158,6 +2334,81 @@ ${businessName}`;
           <p style="margin-top: 40px; font-size: 10pt; color: #666; text-align: center;">
             <em>This is a legal document. Please review carefully and consult with an attorney if you have any questions.</em>
           </p>
+      `;
+
+      // If only body content requested (for editor), return it
+      if (returnBodyOnly) {
+        return bodyContent;
+      }
+
+      // Otherwise, wrap in full HTML document and open window
+      const html = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Independent Contractor Agreement - ${clientName}</title>
+          <style>
+            @page {
+              margin: 0.5in;
+            }
+            body {
+              font-family: 'Times New Roman', serif;
+              line-height: 1.6;
+              color: #000;
+              padding: 40px;
+              max-width: 8.5in;
+              margin: 0 auto;
+              font-size: 12pt;
+            }
+            @media print {
+              body { 
+                padding: 0;
+                margin: 0;
+              }
+            }
+            h1 {
+              font-size: 18pt;
+              font-weight: bold;
+              text-align: center;
+              margin-bottom: 20px;
+            }
+            h2 {
+              font-size: 14pt;
+              font-weight: bold;
+              margin-top: 20px;
+              margin-bottom: 10px;
+            }
+            p {
+              margin: 10px 0;
+              text-align: justify;
+            }
+            .signature-section {
+              margin-top: 40px;
+              page-break-inside: avoid;
+            }
+            .signature-line {
+              margin-top: 50px;
+              border-top: 1px solid #000;
+              padding-top: 5px;
+              width: 300px;
+            }
+            .print-btn {
+              background: #2c3e50; color: #fff; padding: 12px 24px; border: none;
+              border-radius: 6px; cursor: pointer; font-size: 14px; margin-bottom: 20px;
+              font-weight: 500;
+            }
+            .print-btn:hover { background: #34495e; }
+            .print-instruction { color: #7f8c8d; font-size: 12px; margin-bottom: 20px; }
+            @media print { 
+              .print-btn { display: none; }
+              .print-instruction { display: none; }
+            }
+          </style>
+        </head>
+        <body>
+          <button class="print-btn" onclick="window.print()">Print / Save as PDF</button>
+          <p class="print-instruction">💡 In the print dialog, make sure to disable "Headers and footers" for a clean PDF</p>
+          ${bodyContent}
         </body>
         </html>
       `;
