@@ -1956,6 +1956,17 @@ ${businessName}`;
           <p><strong>1.2 Deliverables:</strong> Contractor shall provide the following services and deliverables:</p>
           <p style="margin-left: 20px;">${escapeHtml(scope).replace(/\n/g, '<br>')}</p>
           <p><strong>1.3 Timeline:</strong> ${escapeHtml(timeline)}</p>
+          <p><strong>1.4 Timeline as Goal, Not Guarantee:</strong> The timeline specified in Section 1.3 is a goal and estimate based on the information available at the time of execution of this Agreement and assumes timely cooperation and performance by both parties. The timeline is not a guarantee, and Contractor shall not be liable for delays in completion beyond the estimated timeline that result from:</p>
+          <ul style="margin-left: 20px;">
+            <li>Client's failure to provide required content, materials, information, or approvals in a timely manner;</li>
+            <li>Client's requests for changes, revisions, or modifications to the scope of work;</li>
+            <li>Client's failure to respond to Contractor's requests for feedback or decisions within reasonable time frames;</li>
+            <li>Delays in Third-Party Services, including but not limited to hosting setup, domain registration, or API access;</li>
+            <li>Unforeseen technical difficulties or complications that arise during development;</li>
+            <li>Acts of God, natural disasters, or other force majeure events;</li>
+            <li>Any other circumstances beyond Contractor's reasonable control.</li>
+          </ul>
+          <p>In the event of delays caused by Client or circumstances beyond Contractor's control, Contractor shall have a reasonable extension of time to complete the work, and the completion date shall be adjusted accordingly. Client acknowledges that delays may occur and agrees not to hold Contractor liable for such delays, provided Contractor continues to work diligently on the project.</p>
 
           <h2>2. COMPENSATION</h2>
           <p><strong>2.1 Total Fee:</strong> Client agrees to pay Contractor a total fee of ${formattedFee} for the services described herein.</p>
@@ -1994,11 +2005,12 @@ ${businessName}`;
           <p>Client agrees to:</p>
           <ul style="margin-left: 20px;">
             <li>Provide all necessary information, content, materials, and access required for Contractor to perform the services;</li>
-            <li>Respond to Contractor's requests for feedback, approvals, or information in a timely manner;</li>
+            <li>Respond to Contractor's requests for feedback, approvals, or information in a timely manner (within [Number] business days, unless otherwise agreed);</li>
             <li>Make payments according to the payment schedule outlined in Section 2.2;</li>
             <li>Obtain any necessary licenses, permissions, or rights for materials provided to Contractor;</li>
             <li>Comply with all applicable laws and regulations in relation to the project.</li>
           </ul>
+          <p><strong>6.1 Effect of Client Delays:</strong> Client acknowledges that timely performance of Client's obligations is essential to Contractor's ability to meet the estimated timeline set forth in Section 1.3. Any delays caused by Client's failure to timely perform its obligations under this Section 6, including but not limited to delays in providing content, feedback, or approvals, shall extend the project timeline accordingly and shall not constitute a breach by Contractor. Client shall be responsible for any additional costs or fees resulting from Client-caused delays, including but not limited to rush fees for expedited delivery to meet original deadlines.</p>
 
           <h2>7. REVISIONS AND CHANGES</h2>
           <p><strong>7.1 Revisions:</strong> Contractor shall provide [Number] rounds of revisions per phase, as outlined in the scope of work. Additional revisions may be requested but shall be subject to additional fees at Contractor's then-current hourly rate.</p>
