@@ -880,18 +880,12 @@
         </div>
       </div>
 
-      <!-- Payment Terms & Notes -->
+      <!-- Notes -->
       <div class="card">
-        <h2>Payment Terms & Notes</h2>
+        <h2>Notes</h2>
         <div class="row">
           <div class="col">
-            <label>Payment Terms</label>
-            <input type="text" id="invoice_payment_terms" placeholder="Net 30" value="Net 30">
-          </div>
-        </div>
-        <div class="row">
-          <div class="col">
-            <label>Notes/Additional Information</label>
+            <label>Additional Information</label>
             <textarea id="invoice_notes" rows="4" placeholder="Payment instructions, thank you message, etc."></textarea>
           </div>
         </div>
@@ -2729,7 +2723,6 @@ ${businessName}`;
       const clientName = document.getElementById('invoice_client_name').value || 'Client';
       const clientEmail = document.getElementById('invoice_client_email').value || '';
       const clientAddress = document.getElementById('invoice_client_address').value || '';
-      const paymentTerms = document.getElementById('invoice_payment_terms').value || 'Net 30';
       const notes = document.getElementById('invoice_notes').value || '';
       const subtotal = parseFloat(document.getElementById('invoice_subtotal').textContent) || 0;
       const tax = parseFloat(document.getElementById('invoice_tax').textContent) || 0;
@@ -2917,9 +2910,6 @@ ${businessName}`;
               <p><strong>Invoice Date:</strong> ${formatDate(invoiceDate)}</p>
               ${dueDate ? `<p><strong>Due Date:</strong> ${formatDate(dueDate)}</p>` : ''}
             </div>
-            <div class="info-section">
-              <p><strong>Payment Terms:</strong> ${paymentTerms}</p>
-            </div>
           </div>
 
           <table>
@@ -2992,7 +2982,6 @@ ${businessName}`;
         client_email: document.getElementById('invoice_client_email').value,
         client_address: document.getElementById('invoice_client_address').value,
         tax_rate: document.getElementById('invoice_tax_rate').value,
-        payment_terms: document.getElementById('invoice_payment_terms').value,
         notes: document.getElementById('invoice_notes').value,
         items: invoiceItems
       };
@@ -3025,7 +3014,6 @@ ${businessName}`;
         document.getElementById('invoice_client_email').value = invoiceData.client_email || '';
         document.getElementById('invoice_client_address').value = invoiceData.client_address || '';
         document.getElementById('invoice_tax_rate').value = invoiceData.tax_rate || '0';
-        document.getElementById('invoice_payment_terms').value = invoiceData.payment_terms || 'Net 30';
         document.getElementById('invoice_notes').value = invoiceData.notes || '';
 
         // Clear existing items first
@@ -3075,7 +3063,6 @@ ${businessName}`;
         'invoice_client_email',
         'invoice_client_address',
         'invoice_tax_rate',
-        'invoice_payment_terms',
         'invoice_notes'
       ];
 
@@ -3101,7 +3088,6 @@ ${businessName}`;
       document.getElementById('invoice_client_email').value = '';
       document.getElementById('invoice_client_address').value = '';
       document.getElementById('invoice_tax_rate').value = '0';
-      document.getElementById('invoice_payment_terms').value = 'Net 30';
       document.getElementById('invoice_notes').value = '';
       document.getElementById('invoice-items-list').innerHTML = '';
       
