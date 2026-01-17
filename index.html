@@ -955,7 +955,13 @@
         <div class="row">
           <div class="col">
             <label>Paste conversation between client</label>
-            <textarea id="project_md_conversation" rows="12" placeholder="Paste emails, Slack messages, meeting notes, or any conversation with the client about the project..."></textarea>
+            <textarea id="project_md_conversation" rows="8" placeholder="Paste emails, Slack messages, meeting notes, or any conversation with the client about the project..."></textarea>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col">
+            <label>Discovery Call Transcript</label>
+            <textarea id="project_md_discovery_call" rows="12" placeholder="Paste the transcript from the discovery call with the client..."></textarea>
           </div>
         </div>
       </div>
@@ -3285,6 +3291,7 @@ ${businessName}`;
       const companyDescription = document.getElementById('project_md_company_description').value || '';
       const targetAudience = document.getElementById('project_md_target_audience').value || '';
       const conversation = document.getElementById('project_md_conversation').value || '';
+      const discoveryCall = document.getElementById('project_md_discovery_call').value || '';
       const websiteUrl = document.getElementById('project_md_website_url').value || '';
       const referenceLinks = document.getElementById('project_md_reference_links').value || '';
       const goals = document.getElementById('project_md_goals').value || '';
@@ -3348,6 +3355,10 @@ ${businessName}`;
         markdown += `## Client Conversation / Requirements\n\n${conversation}\n\n`;
       }
 
+      if (discoveryCall) {
+        markdown += `## Discovery Call Transcript\n\n${discoveryCall}\n\n`;
+      }
+
       if (notes) {
         markdown += `## Additional Notes\n\n${notes}\n\n`;
       }
@@ -3376,6 +3387,7 @@ ${businessName}`;
         company_description: document.getElementById('project_md_company_description').value,
         target_audience: document.getElementById('project_md_target_audience').value,
         conversation: document.getElementById('project_md_conversation').value,
+        discovery_call: document.getElementById('project_md_discovery_call').value,
         website_url: document.getElementById('project_md_website_url').value,
         reference_links: document.getElementById('project_md_reference_links').value,
         goals: document.getElementById('project_md_goals').value,
@@ -3405,6 +3417,7 @@ ${businessName}`;
         document.getElementById('project_md_company_description').value = projectMDData.company_description || '';
         document.getElementById('project_md_target_audience').value = projectMDData.target_audience || '';
         document.getElementById('project_md_conversation').value = projectMDData.conversation || '';
+        document.getElementById('project_md_discovery_call').value = projectMDData.discovery_call || '';
         document.getElementById('project_md_website_url').value = projectMDData.website_url || '';
         document.getElementById('project_md_reference_links').value = projectMDData.reference_links || '';
         document.getElementById('project_md_goals').value = projectMDData.goals || '';
@@ -3434,6 +3447,7 @@ ${businessName}`;
         'project_md_company_description',
         'project_md_target_audience',
         'project_md_conversation',
+        'project_md_discovery_call',
         'project_md_website_url',
         'project_md_reference_links',
         'project_md_goals',
@@ -3461,6 +3475,7 @@ ${businessName}`;
       document.getElementById('project_md_company_description').value = '';
       document.getElementById('project_md_target_audience').value = '';
       document.getElementById('project_md_conversation').value = '';
+      document.getElementById('project_md_discovery_call').value = '';
       document.getElementById('project_md_website_url').value = '';
       document.getElementById('project_md_reference_links').value = '';
       document.getElementById('project_md_goals').value = '';
