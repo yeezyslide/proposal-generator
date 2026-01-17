@@ -912,6 +912,17 @@
       <input type="email" id="settings_business_email" placeholder="hello@example.com">
       <label>Phone</label>
       <input type="text" id="settings_business_phone" placeholder="(555) 123-4567">
+      <h3 style="margin-top: 20px; margin-bottom: 12px; color: #fff; font-size: 16px;">Bank Transfer Details</h3>
+      <label>Bank Name</label>
+      <input type="text" id="settings_bank_name" placeholder="JP Morgan Chase">
+      <label>Account Number</label>
+      <input type="text" id="settings_bank_account" placeholder="687043015">
+      <label>Routing Number (Wire Transfer)</label>
+      <input type="text" id="settings_bank_routing" placeholder="044000037">
+      <label>Account Name</label>
+      <input type="text" id="settings_bank_account_name" placeholder="MMP Capital LLC">
+      <label>Account Address</label>
+      <textarea id="settings_bank_address" rows="2" placeholder="Street Address, City, State ZIP"></textarea>
       <label>Studio Logo</label>
       <input type="file" id="settings_logo" accept="image/*" style="margin-bottom: 12px;">
       <div id="logo-preview" style="margin-bottom: 12px;"></div>
@@ -997,6 +1008,13 @@
         document.getElementById('settings_business_email').value = settings.business_email || '';
         document.getElementById('settings_business_phone').value = settings.business_phone || '';
         
+        // Load bank details with defaults
+        document.getElementById('settings_bank_name').value = settings.bank_name || 'JP Morgan Chase';
+        document.getElementById('settings_bank_account').value = settings.bank_account || '687043015';
+        document.getElementById('settings_bank_routing').value = settings.bank_routing || '044000037';
+        document.getElementById('settings_bank_account_name').value = settings.bank_account_name || 'MMP Capital LLC';
+        document.getElementById('settings_bank_address').value = settings.bank_address || '40638 Grenata Preserve Place, Leesburg Virginia 20175 United States';
+        
         // Show logo preview if exists
         if (settings.logo_base64) {
           showLogoPreview(settings.logo_base64);
@@ -1030,6 +1048,11 @@
             business_name: document.getElementById('settings_business_name').value,
             business_email: document.getElementById('settings_business_email').value,
             business_phone: document.getElementById('settings_business_phone').value,
+            bank_name: document.getElementById('settings_bank_name').value,
+            bank_account: document.getElementById('settings_bank_account').value,
+            bank_routing: document.getElementById('settings_bank_routing').value,
+            bank_account_name: document.getElementById('settings_bank_account_name').value,
+            bank_address: document.getElementById('settings_bank_address').value,
             logo_base64: e.target.result
           };
           localStorage.setItem('proposalSettings', JSON.stringify(settings));
@@ -1042,6 +1065,11 @@
           business_name: document.getElementById('settings_business_name').value,
           business_email: document.getElementById('settings_business_email').value,
           business_phone: document.getElementById('settings_business_phone').value,
+          bank_name: document.getElementById('settings_bank_name').value,
+          bank_account: document.getElementById('settings_bank_account').value,
+          bank_routing: document.getElementById('settings_bank_routing').value,
+          bank_account_name: document.getElementById('settings_bank_account_name').value,
+          bank_address: document.getElementById('settings_bank_address').value,
           logo_base64: settings.logo_base64 // Keep existing logo
         };
         localStorage.setItem('proposalSettings', JSON.stringify(settings));
@@ -2736,6 +2764,13 @@ ${businessName}`;
       const billFromAddress = document.getElementById('invoice_bill_from_address').value || '';
       const logoBase64 = settings.logo_base64 || '';
 
+      // Get bank details from settings
+      const bankName = settings.bank_name || 'JP Morgan Chase';
+      const bankAccount = settings.bank_account || '687043015';
+      const bankRouting = settings.bank_routing || '044000037';
+      const bankAccountName = settings.bank_account_name || 'MMP Capital LLC';
+      const bankAddress = settings.bank_address || '40638 Grenata Preserve Place, Leesburg Virginia 20175 United States';
+
       // Build line items HTML
       let lineItemsHtml = '';
       const items = document.querySelectorAll('#invoice-items-list .list-item');
@@ -2943,8 +2978,19 @@ ${businessName}`;
             </div>
           </div>
 
+          <div class="notes" style="margin-top: 40px;">
+            <h3>Bank Transfer Details</h3>
+            <p style="margin: 8px 0;">
+              <strong>Bank Name:</strong> ${bankName}<br>
+              <strong>Account No:</strong> ${bankAccount}<br>
+              <strong>Routing No (Wire Transfer):</strong> ${bankRouting}<br>
+              <strong>Account Name:</strong> ${bankAccountName}<br>
+              <strong>Address:</strong> ${bankAddress}
+            </p>
+          </div>
+
           ${notes ? `
-          <div class="notes">
+          <div class="notes" style="margin-top: 40px;">
             <h3>Notes</h3>
             <p>${notes}</p>
           </div>
