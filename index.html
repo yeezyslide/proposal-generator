@@ -519,6 +519,9 @@
       <button class="tab-btn" id="invoice-tab" onclick="switchTab('invoice')" style="background: transparent; border: none; padding: 12px 20px; color: #999; cursor: pointer; border-bottom: 2px solid transparent; font-size: 14px; font-weight: 500; transition: all 0.2s;">
         Invoice
       </button>
+      <button class="tab-btn" id="project-md-tab" onclick="switchTab('project-md')" style="background: transparent; border: none; padding: 12px 20px; color: #999; cursor: pointer; border-bottom: 2px solid transparent; font-size: 14px; font-weight: 500; transition: all 0.2s;">
+        Project MD File
+      </button>
     </div>
 
     <div id="status" class="status"></div>
@@ -897,6 +900,124 @@
           Generate Invoice PDF
         </button>
         <button class="btn btn-secondary" onclick="clearInvoiceForm()">
+          Clear All
+        </button>
+      </div>
+    </div>
+
+    <!-- Project MD File Tab Content -->
+    <div id="project-md-content" class="tab-content" style="display: none;">
+      <!-- Project Information -->
+      <div class="card">
+        <h2>Project Information</h2>
+        <div class="row">
+          <div class="col">
+            <label>Project Name</label>
+            <input type="text" id="project_md_name" placeholder="Website Redesign for Acme Corp">
+          </div>
+          <div class="col">
+            <label>Project Niche / Industry</label>
+            <input type="text" id="project_md_niche" placeholder="SaaS, E-commerce, Healthcare, etc.">
+          </div>
+        </div>
+      </div>
+
+      <!-- Company Details -->
+      <div class="card">
+        <h2>Company Details</h2>
+        <div class="row">
+          <div class="col">
+            <label>Company Name</label>
+            <input type="text" id="project_md_company_name" placeholder="Acme Corporation">
+          </div>
+          <div class="col">
+            <label>Industry / Sector</label>
+            <input type="text" id="project_md_industry" placeholder="Technology, Retail, etc.">
+          </div>
+        </div>
+        <div class="row">
+          <div class="col">
+            <label>Company Description</label>
+            <textarea id="project_md_company_description" rows="3" placeholder="Brief description of what the company does..."></textarea>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col">
+            <label>Target Audience</label>
+            <textarea id="project_md_target_audience" rows="2" placeholder="Who are the target users/customers?"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- Client Conversation -->
+      <div class="card">
+        <h2>Client Conversation / Requirements</h2>
+        <div class="row">
+          <div class="col">
+            <label>Paste conversation between client</label>
+            <textarea id="project_md_conversation" rows="12" placeholder="Paste emails, Slack messages, meeting notes, or any conversation with the client about the project..."></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- Reference Sites -->
+      <div class="card">
+        <h2>Reference Site Links</h2>
+        <div class="row">
+          <div class="col">
+            <label>Website URL (if existing)</label>
+            <input type="url" id="project_md_website_url" placeholder="https://example.com">
+          </div>
+        </div>
+        <div class="row">
+          <div class="col">
+            <label>Reference Sites / Inspiration (one per line)</label>
+            <textarea id="project_md_reference_links" rows="6" placeholder="https://reference-site-1.com&#10;https://reference-site-2.com&#10;https://inspiration-example.com"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- Additional Project Details -->
+      <div class="card">
+        <h2>Additional Project Details</h2>
+        <div class="row">
+          <div class="col">
+            <label>Project Goals / Objectives</label>
+            <textarea id="project_md_goals" rows="4" placeholder="What are the main goals for this project? What problems are we solving?"></textarea>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col">
+            <label>Key Requirements / Deliverables</label>
+            <textarea id="project_md_requirements" rows="4" placeholder="List key features, deliverables, and requirements..."></textarea>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col">
+            <label>Technology Stack (Optional)</label>
+            <input type="text" id="project_md_tech_stack" placeholder="React, Next.js, Shopify, WordPress, etc.">
+          </div>
+        </div>
+        <div class="row">
+          <div class="col">
+            <label>Timeline / Important Dates (Optional)</label>
+            <textarea id="project_md_timeline" rows="2" placeholder="Launch date, milestone dates, etc."></textarea>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col">
+            <label>Additional Notes</label>
+            <textarea id="project_md_notes" rows="4" placeholder="Any other relevant information about the project..."></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="actions">
+        <button class="btn btn-primary" onclick="generateProjectMD()">
+          Generate Markdown File
+        </button>
+        <button class="btn btn-secondary" onclick="clearProjectMDForm()">
           Clear All
         </button>
       </div>
@@ -2092,19 +2213,23 @@ ${businessName}`;
       const proposalTab = document.getElementById('proposal-tab');
       const contractTab = document.getElementById('contract-tab');
       const invoiceTab = document.getElementById('invoice-tab');
+      const projectMdTab = document.getElementById('project-md-tab');
       const proposalContent = document.getElementById('proposal-content');
       const contractContent = document.getElementById('contract-content');
       const invoiceContent = document.getElementById('invoice-content');
+      const projectMdContent = document.getElementById('project-md-content');
 
       // Remove active from all tabs
       proposalTab.classList.remove('active');
       contractTab.classList.remove('active');
       invoiceTab.classList.remove('active');
+      projectMdTab.classList.remove('active');
       
       // Hide all content
       proposalContent.style.display = 'none';
       contractContent.style.display = 'none';
       invoiceContent.style.display = 'none';
+      projectMdContent.style.display = 'none';
 
       if (tab === 'proposal') {
         proposalTab.classList.add('active');
@@ -2115,6 +2240,9 @@ ${businessName}`;
       } else if (tab === 'invoice') {
         invoiceTab.classList.add('active');
         invoiceContent.style.display = 'block';
+      } else if (tab === 'project-md') {
+        projectMdTab.classList.add('active');
+        projectMdContent.style.display = 'block';
       }
     }
 
@@ -3148,6 +3276,203 @@ ${businessName}`;
       addInvoiceItem();
     }
 
+    // Project MD File Functions
+    function generateProjectMD() {
+      const projectName = document.getElementById('project_md_name').value || 'Untitled Project';
+      const projectNiche = document.getElementById('project_md_niche').value || '';
+      const companyName = document.getElementById('project_md_company_name').value || '';
+      const industry = document.getElementById('project_md_industry').value || '';
+      const companyDescription = document.getElementById('project_md_company_description').value || '';
+      const targetAudience = document.getElementById('project_md_target_audience').value || '';
+      const conversation = document.getElementById('project_md_conversation').value || '';
+      const websiteUrl = document.getElementById('project_md_website_url').value || '';
+      const referenceLinks = document.getElementById('project_md_reference_links').value || '';
+      const goals = document.getElementById('project_md_goals').value || '';
+      const requirements = document.getElementById('project_md_requirements').value || '';
+      const techStack = document.getElementById('project_md_tech_stack').value || '';
+      const timeline = document.getElementById('project_md_timeline').value || '';
+      const notes = document.getElementById('project_md_notes').value || '';
+
+      // Generate markdown content
+      let markdown = `# ${projectName}\n\n`;
+
+      if (projectNiche) {
+        markdown += `## Project Niche\n${projectNiche}\n\n`;
+      }
+
+      markdown += `## Company Details\n\n`;
+      if (companyName) {
+        markdown += `**Company Name:** ${companyName}\n\n`;
+      }
+      if (industry) {
+        markdown += `**Industry / Sector:** ${industry}\n\n`;
+      }
+      if (companyDescription) {
+        markdown += `**Company Description:**\n${companyDescription}\n\n`;
+      }
+      if (targetAudience) {
+        markdown += `**Target Audience:**\n${targetAudience}\n\n`;
+      }
+
+      if (websiteUrl) {
+        markdown += `**Website URL:** ${websiteUrl}\n\n`;
+      }
+
+      if (referenceLinks) {
+        markdown += `## Reference Site Links\n\n`;
+        const links = referenceLinks.split('\n').filter(link => link.trim());
+        links.forEach(link => {
+          const trimmed = link.trim();
+          markdown += `- ${trimmed}\n`;
+        });
+        markdown += `\n`;
+      }
+
+      if (goals) {
+        markdown += `## Project Goals / Objectives\n\n${goals}\n\n`;
+      }
+
+      if (requirements) {
+        markdown += `## Key Requirements / Deliverables\n\n${requirements}\n\n`;
+      }
+
+      if (techStack) {
+        markdown += `## Technology Stack\n${techStack}\n\n`;
+      }
+
+      if (timeline) {
+        markdown += `## Timeline / Important Dates\n\n${timeline}\n\n`;
+      }
+
+      if (conversation) {
+        markdown += `## Client Conversation / Requirements\n\n${conversation}\n\n`;
+      }
+
+      if (notes) {
+        markdown += `## Additional Notes\n\n${notes}\n\n`;
+      }
+
+      // Create a blob and download
+      const blob = new Blob([markdown], { type: 'text/markdown' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${projectName.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.md`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      showStatus('Markdown file downloaded!', 'success');
+    }
+
+    // Project MD form auto-save functionality
+    function saveProjectMDFormData() {
+      const projectMDData = {
+        project_name: document.getElementById('project_md_name').value,
+        project_niche: document.getElementById('project_md_niche').value,
+        company_name: document.getElementById('project_md_company_name').value,
+        industry: document.getElementById('project_md_industry').value,
+        company_description: document.getElementById('project_md_company_description').value,
+        target_audience: document.getElementById('project_md_target_audience').value,
+        conversation: document.getElementById('project_md_conversation').value,
+        website_url: document.getElementById('project_md_website_url').value,
+        reference_links: document.getElementById('project_md_reference_links').value,
+        goals: document.getElementById('project_md_goals').value,
+        requirements: document.getElementById('project_md_requirements').value,
+        tech_stack: document.getElementById('project_md_tech_stack').value,
+        timeline: document.getElementById('project_md_timeline').value,
+        notes: document.getElementById('project_md_notes').value
+      };
+
+      localStorage.setItem('projectMDFormData', JSON.stringify(projectMDData));
+    }
+
+    function loadProjectMDFormData() {
+      try {
+        const saved = localStorage.getItem('projectMDFormData');
+        if (!saved) {
+          return;
+        }
+
+        const projectMDData = JSON.parse(saved);
+
+        // Load all fields
+        document.getElementById('project_md_name').value = projectMDData.project_name || '';
+        document.getElementById('project_md_niche').value = projectMDData.project_niche || '';
+        document.getElementById('project_md_company_name').value = projectMDData.company_name || '';
+        document.getElementById('project_md_industry').value = projectMDData.industry || '';
+        document.getElementById('project_md_company_description').value = projectMDData.company_description || '';
+        document.getElementById('project_md_target_audience').value = projectMDData.target_audience || '';
+        document.getElementById('project_md_conversation').value = projectMDData.conversation || '';
+        document.getElementById('project_md_website_url').value = projectMDData.website_url || '';
+        document.getElementById('project_md_reference_links').value = projectMDData.reference_links || '';
+        document.getElementById('project_md_goals').value = projectMDData.goals || '';
+        document.getElementById('project_md_requirements').value = projectMDData.requirements || '';
+        document.getElementById('project_md_tech_stack').value = projectMDData.tech_stack || '';
+        document.getElementById('project_md_timeline').value = projectMDData.timeline || '';
+        document.getElementById('project_md_notes').value = projectMDData.notes || '';
+      } catch (e) {
+        console.error('Failed to load project MD form data:', e);
+      }
+    }
+
+    // Auto-save project MD form on input changes (debounced)
+    let saveProjectMDTimeout;
+    function debouncedSaveProjectMD() {
+      clearTimeout(saveProjectMDTimeout);
+      saveProjectMDTimeout = setTimeout(saveProjectMDFormData, 500);
+    }
+
+    // Setup auto-save listeners for project MD form
+    function setupProjectMDAutoSave() {
+      const projectMDFields = [
+        'project_md_name',
+        'project_md_niche',
+        'project_md_company_name',
+        'project_md_industry',
+        'project_md_company_description',
+        'project_md_target_audience',
+        'project_md_conversation',
+        'project_md_website_url',
+        'project_md_reference_links',
+        'project_md_goals',
+        'project_md_requirements',
+        'project_md_tech_stack',
+        'project_md_timeline',
+        'project_md_notes'
+      ];
+
+      projectMDFields.forEach(id => {
+        const element = document.getElementById(id);
+        if (element) {
+          element.addEventListener('input', debouncedSaveProjectMD);
+          element.addEventListener('change', debouncedSaveProjectMD);
+        }
+      });
+    }
+
+    function clearProjectMDForm() {
+      if (!confirm('Clear all project MD form data?')) return;
+      document.getElementById('project_md_name').value = '';
+      document.getElementById('project_md_niche').value = '';
+      document.getElementById('project_md_company_name').value = '';
+      document.getElementById('project_md_industry').value = '';
+      document.getElementById('project_md_company_description').value = '';
+      document.getElementById('project_md_target_audience').value = '';
+      document.getElementById('project_md_conversation').value = '';
+      document.getElementById('project_md_website_url').value = '';
+      document.getElementById('project_md_reference_links').value = '';
+      document.getElementById('project_md_goals').value = '';
+      document.getElementById('project_md_requirements').value = '';
+      document.getElementById('project_md_tech_stack').value = '';
+      document.getElementById('project_md_timeline').value = '';
+      document.getElementById('project_md_notes').value = '';
+      
+      // Clear saved data
+      localStorage.removeItem('projectMDFormData');
+    }
+
     // Initialize
     loadSettings();
     loadFormData(); // Load saved proposal form data
@@ -3156,6 +3481,8 @@ ${businessName}`;
     setupContractAutoSave(); // Setup contract auto-save listeners
     loadInvoiceFormData(); // Load saved invoice form data
     setupInvoiceAutoSave(); // Setup invoice auto-save listeners
+    loadProjectMDFormData(); // Load saved project MD form data
+    setupProjectMDAutoSave(); // Setup project MD auto-save listeners
   </script>
 </body>
 </html>
