@@ -1,0 +1,925 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pipeline - WenLaunch Hub</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+      background: #0a0a0a;
+      color: #e5e5e5;
+      line-height: 1.5;
+      min-height: 100vh;
+    }
+
+    .container {
+      padding: 20px;
+      max-width: 100%;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    h1 {
+      font-size: 24px;
+      font-weight: 600;
+      color: #fff;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn {
+      padding: 10px 16px;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-primary {
+      background: #fff;
+      color: #000;
+    }
+
+    .btn-primary:hover { background: #e0e0e0; }
+
+    .btn-secondary {
+      background: #222;
+      color: #e5e5e5;
+      border: 1px solid #333;
+    }
+
+    .btn-secondary:hover { background: #2a2a2a; border-color: #444; }
+
+    .btn-icon {
+      background: transparent;
+      border: 1px solid #333;
+      color: #999;
+      padding: 8px 12px;
+    }
+
+    .btn-icon:hover { background: #1a1a1a; border-color: #444; color: #fff; }
+
+    /* Kanban Board */
+    .kanban-board {
+      display: flex;
+      gap: 16px;
+      overflow-x: auto;
+      padding-bottom: 20px;
+      min-height: calc(100vh - 140px);
+    }
+
+    .kanban-column {
+      flex: 0 0 300px;
+      background: #141414;
+      border: 1px solid #222;
+      border-radius: 12px;
+      display: flex;
+      flex-direction: column;
+      max-height: calc(100vh - 140px);
+    }
+
+    .column-header {
+      padding: 16px;
+      border-bottom: 1px solid #222;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .column-title {
+      font-weight: 600;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .column-count {
+      background: #333;
+      color: #999;
+      font-size: 12px;
+      padding: 2px 8px;
+      border-radius: 10px;
+    }
+
+    .column-value {
+      font-size: 12px;
+      color: #4ade80;
+      font-weight: 500;
+    }
+
+    .column-cards {
+      flex: 1;
+      overflow-y: auto;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      min-height: 100px;
+    }
+
+    .column-cards.drag-over {
+      background: #1a1a1a;
+    }
+
+    /* Cards */
+    .card {
+      background: #1a1a1a;
+      border: 1px solid #282828;
+      border-radius: 8px;
+      padding: 14px;
+      cursor: grab;
+      transition: all 0.2s;
+    }
+
+    .card:hover {
+      border-color: #444;
+      transform: translateY(-1px);
+    }
+
+    .card.dragging {
+      opacity: 0.5;
+      cursor: grabbing;
+    }
+
+    .card-name {
+      font-weight: 600;
+      font-size: 14px;
+      color: #fff;
+      margin-bottom: 4px;
+    }
+
+    .card-company {
+      font-size: 13px;
+      color: #888;
+      margin-bottom: 8px;
+    }
+
+    .card-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+    }
+
+    .card-value {
+      color: #4ade80;
+      font-weight: 500;
+    }
+
+    .card-source {
+      background: #333;
+      color: #999;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+    }
+
+    .card-email {
+      color: #666;
+      font-size: 11px;
+      margin-top: 8px;
+      word-break: break-all;
+    }
+
+    /* Modal */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.8);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal {
+      background: #141414;
+      border: 1px solid #222;
+      border-radius: 12px;
+      padding: 24px;
+      max-width: 500px;
+      width: 90%;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .modal h2 {
+      margin-bottom: 20px;
+      color: #fff;
+      font-size: 18px;
+    }
+
+    .modal label {
+      display: block;
+      font-size: 13px;
+      font-weight: 500;
+      margin-bottom: 6px;
+      color: #888;
+    }
+
+    .modal input, .modal select, .modal textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #333;
+      border-radius: 6px;
+      font-size: 14px;
+      font-family: inherit;
+      margin-bottom: 16px;
+      background: #1a1a1a;
+      color: #e5e5e5;
+      transition: border-color 0.2s;
+    }
+
+    .modal input:focus, .modal select:focus, .modal textarea:focus {
+      outline: none;
+      border-color: #fff;
+    }
+
+    .modal textarea {
+      min-height: 80px;
+      resize: vertical;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 12px;
+      justify-content: flex-end;
+      margin-top: 20px;
+    }
+
+    .modal-row {
+      display: flex;
+      gap: 12px;
+    }
+
+    .modal-row > * {
+      flex: 1;
+    }
+
+    /* Nav */
+    .nav-tabs {
+      display: flex;
+      gap: 4px;
+      background: #1a1a1a;
+      padding: 4px;
+      border-radius: 8px;
+    }
+
+    .nav-tab {
+      padding: 8px 16px;
+      border: none;
+      background: transparent;
+      color: #888;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      border-radius: 6px;
+      transition: all 0.2s;
+    }
+
+    .nav-tab:hover {
+      color: #fff;
+    }
+
+    .nav-tab.active {
+      background: #333;
+      color: #fff;
+    }
+
+    /* Status indicator */
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    .status-dot.contacted { background: #f97316; }
+    .status-dot.preparing { background: #ec4899; }
+    .status-dot.meeting { background: #22c55e; }
+    .status-dot.proposal { background: #3b82f6; }
+    .status-dot.negotiating { background: #eab308; }
+    .status-dot.active { background: #a855f7; }
+    .status-dot.complete { background: #22c55e; }
+    .status-dot.lost { background: #ef4444; }
+
+    /* Loading */
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: #666;
+    }
+
+    /* Stats bar */
+    .stats-bar {
+      display: flex;
+      gap: 24px;
+      margin-bottom: 20px;
+      padding: 16px;
+      background: #141414;
+      border: 1px solid #222;
+      border-radius: 8px;
+    }
+
+    .stat {
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: 24px;
+      font-weight: 600;
+      color: #fff;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: #666;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #22c55e;
+      color: #fff;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.3s;
+      z-index: 200;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .toast.error {
+      background: #ef4444;
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: #1a1a1a; }
+    ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #444; }
+
+    /* Login */
+    .login-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: #0a0a0a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+
+    .login-box {
+      background: #141414;
+      border: 1px solid #222;
+      border-radius: 12px;
+      padding: 40px;
+      width: 100%;
+      max-width: 400px;
+      text-align: center;
+    }
+
+    .login-box h1 { margin-bottom: 8px; font-size: 24px; }
+    .login-box p { color: #666; margin-bottom: 24px; }
+    .login-box input { text-align: center; font-size: 18px; letter-spacing: 4px; }
+    .login-error { color: #f87171; margin-bottom: 16px; display: none; }
+    .app-content { display: none; }
+    .app-content.visible { display: block; }
+  </style>
+</head>
+<body>
+  <!-- Login Screen -->
+  <div class="login-screen" id="loginScreen">
+    <div class="login-box">
+      <h1>WenLaunch Hub</h1>
+      <p>Enter password to continue</p>
+      <div class="login-error" id="loginError">Invalid password</div>
+      <input type="password" id="passwordInput" placeholder="Password" autofocus>
+      <button class="btn btn-primary" onclick="login()" style="width: 100%; margin-top: 16px;">
+        Enter
+      </button>
+    </div>
+  </div>
+
+  <!-- Main App -->
+  <div class="app-content" id="appContent">
+    <div class="container">
+      <header>
+        <div class="header-left">
+          <h1>🚀 WenLaunch Hub</h1>
+          <nav class="nav-tabs">
+            <a href="index.html" class="nav-tab">Proposals</a>
+            <button class="nav-tab active">Pipeline</button>
+          </nav>
+        </div>
+        <div class="header-actions">
+          <button class="btn btn-icon" onclick="refreshData()" title="Refresh">↻ Sync</button>
+          <button class="btn btn-primary" onclick="openAddModal()">+ Add Lead</button>
+        </div>
+      </header>
+
+      <!-- Stats -->
+      <div class="stats-bar" id="statsBar">
+        <div class="stat">
+          <div class="stat-value" id="statTotal">0</div>
+          <div class="stat-label">Total Leads</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value" id="statActive">0</div>
+          <div class="stat-label">Active</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value" id="statValue">$0</div>
+          <div class="stat-label">Pipeline Value</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value" id="statWon">$0</div>
+          <div class="stat-label">Won</div>
+        </div>
+      </div>
+
+      <!-- Kanban Board -->
+      <div class="kanban-board" id="kanbanBoard">
+        <div class="loading">Loading pipeline data...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add/Edit Modal -->
+  <div class="modal-overlay" id="clientModal">
+    <div class="modal">
+      <h2 id="modalTitle">Add New Lead</h2>
+      <input type="hidden" id="clientId">
+      
+      <div class="modal-row">
+        <div>
+          <label>Contact Name *</label>
+          <input type="text" id="clientName" placeholder="John Doe">
+        </div>
+        <div>
+          <label>Company</label>
+          <input type="text" id="clientCompany" placeholder="Acme Corp">
+        </div>
+      </div>
+
+      <div class="modal-row">
+        <div>
+          <label>Email</label>
+          <input type="email" id="clientEmail" placeholder="john@acme.com">
+        </div>
+        <div>
+          <label>Deal Value</label>
+          <input type="text" id="clientDealValue" placeholder="$5,000">
+        </div>
+      </div>
+
+      <div class="modal-row">
+        <div>
+          <label>Status</label>
+          <select id="clientStatus">
+            <option value="Contacted">Contacted</option>
+            <option value="Preparing Proposal">Preparing Proposal</option>
+            <option value="Meeting Scheduled">Meeting Scheduled</option>
+            <option value="Proposal Sent">Proposal Sent</option>
+            <option value="Negotiating">Negotiating</option>
+            <option value="Active Client">Active Client</option>
+            <option value="Complete">Complete</option>
+            <option value="Lost">Lost</option>
+          </select>
+        </div>
+        <div>
+          <label>Lead Source</label>
+          <select id="clientLeadSource">
+            <option value="">Select...</option>
+          </select>
+        </div>
+      </div>
+
+      <label>Discovery Call Date</label>
+      <input type="date" id="clientDiscoveryCall">
+
+      <label>Summary / Notes</label>
+      <textarea id="clientSummary" placeholder="Key details about this lead..."></textarea>
+
+      <div class="modal-actions">
+        <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="saveClient()">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <script>
+    let authToken = localStorage.getItem('authToken') || '';
+    let clientsData = [];
+    let statusOptions = [];
+    let leadSourceOptions = [];
+
+    const STATUS_ORDER = [
+      'Contacted',
+      'Preparing Proposal', 
+      'Meeting Scheduled',
+      'Proposal Sent',
+      'Negotiating',
+      'Active Client',
+      'Complete',
+      'Lost'
+    ];
+
+    const STATUS_COLORS = {
+      'Contacted': 'contacted',
+      'Preparing Proposal': 'preparing',
+      'Meeting Scheduled': 'meeting',
+      'Proposal Sent': 'proposal',
+      'Negotiating': 'negotiating',
+      'Active Client': 'active',
+      'Complete': 'complete',
+      'Lost': 'lost'
+    };
+
+    // Auth
+    async function login() {
+      const password = document.getElementById('passwordInput').value;
+      try {
+        const res = await fetch('/api/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ password })
+        });
+        const data = await res.json();
+        if (data.success) {
+          authToken = data.token;
+          localStorage.setItem('authToken', authToken);
+          showApp();
+        } else {
+          document.getElementById('loginError').style.display = 'block';
+        }
+      } catch (e) {
+        document.getElementById('loginError').style.display = 'block';
+      }
+    }
+
+    function showApp() {
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('appContent').classList.add('visible');
+      loadData();
+    }
+
+    async function checkAuth() {
+      if (!authToken) return false;
+      try {
+        const res = await fetch('/api/auth-check', {
+          headers: { 'X-Auth-Token': authToken }
+        });
+        const data = await res.json();
+        return data.authenticated;
+      } catch (e) {
+        return false;
+      }
+    }
+
+    document.getElementById('passwordInput').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') login();
+    });
+
+    // Data Loading
+    async function loadData() {
+      try {
+        const res = await fetch('/api/crm', {
+          headers: { 'X-Auth-Token': authToken }
+        });
+        
+        if (!res.ok) throw new Error('Failed to load data');
+        
+        const data = await res.json();
+        clientsData = data.clients || [];
+        statusOptions = data.statusOptions || [];
+        leadSourceOptions = data.leadSourceOptions || [];
+        
+        populateLeadSourceOptions();
+        renderKanban();
+        updateStats();
+      } catch (e) {
+        console.error('Load error:', e);
+        showToast('Failed to load data', true);
+      }
+    }
+
+    function refreshData() {
+      showToast('Syncing with Notion...');
+      loadData().then(() => showToast('Synced!'));
+    }
+
+    function populateLeadSourceOptions() {
+      const select = document.getElementById('clientLeadSource');
+      select.innerHTML = '<option value="">Select...</option>';
+      leadSourceOptions.forEach(opt => {
+        select.innerHTML += `<option value="${opt.name}">${opt.name}</option>`;
+      });
+    }
+
+    // Kanban Rendering
+    function renderKanban() {
+      const board = document.getElementById('kanbanBoard');
+      
+      const columns = STATUS_ORDER.map(status => {
+        const clients = clientsData.filter(c => c.status === status);
+        const totalValue = clients.reduce((sum, c) => {
+          const val = parseFloat(c.dealValue?.replace(/[^0-9.]/g, '') || 0);
+          return sum + val;
+        }, 0);
+        
+        return `
+          <div class="kanban-column" data-status="${status}">
+            <div class="column-header">
+              <div class="column-title">
+                <span class="status-dot ${STATUS_COLORS[status]}"></span>
+                ${status}
+                <span class="column-count">${clients.length}</span>
+              </div>
+              ${totalValue > 0 ? `<span class="column-value">$${totalValue.toLocaleString()}</span>` : ''}
+            </div>
+            <div class="column-cards" 
+                 data-status="${status}"
+                 ondragover="handleDragOver(event)"
+                 ondragleave="handleDragLeave(event)"
+                 ondrop="handleDrop(event)">
+              ${clients.map(c => renderCard(c)).join('')}
+            </div>
+          </div>
+        `;
+      });
+      
+      board.innerHTML = columns.join('');
+    }
+
+    function renderCard(client) {
+      return `
+        <div class="card" 
+             draggable="true"
+             data-id="${client.id}"
+             ondragstart="handleDragStart(event)"
+             ondragend="handleDragEnd(event)"
+             onclick="openEditModal('${client.id}')">
+          <div class="card-name">${escapeHtml(client.name)}</div>
+          ${client.company ? `<div class="card-company">${escapeHtml(client.company)}</div>` : ''}
+          <div class="card-meta">
+            ${client.dealValue ? `<span class="card-value">${escapeHtml(client.dealValue)}</span>` : '<span></span>'}
+            ${client.leadSource ? `<span class="card-source">${escapeHtml(client.leadSource)}</span>` : ''}
+          </div>
+          ${client.email ? `<div class="card-email">${escapeHtml(client.email)}</div>` : ''}
+        </div>
+      `;
+    }
+
+    // Drag and Drop
+    let draggedCard = null;
+
+    function handleDragStart(e) {
+      draggedCard = e.target;
+      e.target.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/plain', e.target.dataset.id);
+    }
+
+    function handleDragEnd(e) {
+      e.target.classList.remove('dragging');
+      document.querySelectorAll('.column-cards').forEach(col => {
+        col.classList.remove('drag-over');
+      });
+      draggedCard = null;
+    }
+
+    function handleDragOver(e) {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      e.currentTarget.classList.add('drag-over');
+    }
+
+    function handleDragLeave(e) {
+      e.currentTarget.classList.remove('drag-over');
+    }
+
+    async function handleDrop(e) {
+      e.preventDefault();
+      e.currentTarget.classList.remove('drag-over');
+      
+      const cardId = e.dataTransfer.getData('text/plain');
+      const newStatus = e.currentTarget.dataset.status;
+      
+      // Find the client
+      const client = clientsData.find(c => c.id === cardId);
+      if (!client || client.status === newStatus) return;
+      
+      // Optimistic update
+      const oldStatus = client.status;
+      client.status = newStatus;
+      renderKanban();
+      updateStats();
+      
+      // Sync to Notion
+      try {
+        const res = await fetch('/api/crm', {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Auth-Token': authToken
+          },
+          body: JSON.stringify({ id: cardId, status: newStatus })
+        });
+        
+        if (!res.ok) throw new Error('Failed to update');
+        showToast(`Moved to ${newStatus}`);
+      } catch (err) {
+        // Rollback
+        client.status = oldStatus;
+        renderKanban();
+        updateStats();
+        showToast('Failed to update', true);
+      }
+    }
+
+    // Stats
+    function updateStats() {
+      const total = clientsData.length;
+      const active = clientsData.filter(c => 
+        !['Complete', 'Lost'].includes(c.status)
+      ).length;
+      
+      let pipelineValue = 0;
+      let wonValue = 0;
+      
+      clientsData.forEach(c => {
+        const val = parseFloat(c.dealValue?.replace(/[^0-9.]/g, '') || 0);
+        if (c.status === 'Complete' || c.status === 'Active Client') {
+          wonValue += val;
+        }
+        if (!['Complete', 'Lost'].includes(c.status)) {
+          pipelineValue += val;
+        }
+      });
+      
+      document.getElementById('statTotal').textContent = total;
+      document.getElementById('statActive').textContent = active;
+      document.getElementById('statValue').textContent = '$' + pipelineValue.toLocaleString();
+      document.getElementById('statWon').textContent = '$' + wonValue.toLocaleString();
+    }
+
+    // Modal
+    function openAddModal() {
+      document.getElementById('modalTitle').textContent = 'Add New Lead';
+      document.getElementById('clientId').value = '';
+      document.getElementById('clientName').value = '';
+      document.getElementById('clientCompany').value = '';
+      document.getElementById('clientEmail').value = '';
+      document.getElementById('clientDealValue').value = '';
+      document.getElementById('clientStatus').value = 'Contacted';
+      document.getElementById('clientLeadSource').value = '';
+      document.getElementById('clientDiscoveryCall').value = '';
+      document.getElementById('clientSummary').value = '';
+      document.getElementById('clientModal').classList.add('active');
+    }
+
+    function openEditModal(id) {
+      const client = clientsData.find(c => c.id === id);
+      if (!client) return;
+      
+      document.getElementById('modalTitle').textContent = 'Edit Lead';
+      document.getElementById('clientId').value = client.id;
+      document.getElementById('clientName').value = client.name || '';
+      document.getElementById('clientCompany').value = client.company || '';
+      document.getElementById('clientEmail').value = client.email || '';
+      document.getElementById('clientDealValue').value = client.dealValue || '';
+      document.getElementById('clientStatus').value = client.status || 'Contacted';
+      document.getElementById('clientLeadSource').value = client.leadSource || '';
+      document.getElementById('clientDiscoveryCall').value = client.discoveryCall || '';
+      document.getElementById('clientSummary').value = client.summary || '';
+      document.getElementById('clientModal').classList.add('active');
+    }
+
+    function closeModal() {
+      document.getElementById('clientModal').classList.remove('active');
+    }
+
+    async function saveClient() {
+      const id = document.getElementById('clientId').value;
+      const data = {
+        name: document.getElementById('clientName').value,
+        company: document.getElementById('clientCompany').value,
+        email: document.getElementById('clientEmail').value,
+        dealValue: document.getElementById('clientDealValue').value,
+        status: document.getElementById('clientStatus').value,
+        leadSource: document.getElementById('clientLeadSource').value,
+        discoveryCall: document.getElementById('clientDiscoveryCall').value,
+        summary: document.getElementById('clientSummary').value
+      };
+
+      if (!data.name) {
+        showToast('Name is required', true);
+        return;
+      }
+
+      try {
+        const method = id ? 'PATCH' : 'POST';
+        if (id) data.id = id;
+
+        const res = await fetch('/api/crm', {
+          method,
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Auth-Token': authToken
+          },
+          body: JSON.stringify(data)
+        });
+
+        if (!res.ok) throw new Error('Failed to save');
+
+        const saved = await res.json();
+        
+        if (id) {
+          // Update existing
+          const idx = clientsData.findIndex(c => c.id === id);
+          if (idx >= 0) clientsData[idx] = saved;
+        } else {
+          // Add new
+          clientsData.push(saved);
+        }
+
+        renderKanban();
+        updateStats();
+        closeModal();
+        showToast(id ? 'Lead updated!' : 'Lead added!');
+      } catch (err) {
+        showToast('Failed to save', true);
+      }
+    }
+
+    // Toast
+    function showToast(message, isError = false) {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.className = 'toast' + (isError ? ' error' : '');
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+
+    // Helpers
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text || '';
+      return div.innerHTML;
+    }
+
+    // Init
+    checkAuth().then(isAuth => {
+      if (isAuth) showApp();
+    });
+  </script>
+</body>
+</html>
